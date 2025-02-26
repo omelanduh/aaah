@@ -8,8 +8,10 @@ local LocalPlayer = Players.LocalPlayer
 -- Variables
 local isLocked = false  -- Kamera kilit durumu
 local lockedTarget = nil  -- Kilitlenen oyuncu
-local isCheckBoxEnabled = false  -- Checkbox işaretli mi?
+local isCheckBoxEnabled = false  -- Camlock tik durumu
+local isESPEnabled = false  -- ESP tik durumu
 local guiVisible = true -- GUI Açık mı?
+local maxLockDistance = 50 -- Maksimum kilitlenme mesafesi
 
 -- GUI Oluşturma
 local ScreenGui = Instance.new("ScreenGui")
@@ -43,6 +45,16 @@ CheckBox.TextSize = 24
 CheckBox.Font = Enum.Font.SourceSansBold
 CheckBox.Parent = Frame
 
+local ESPCheckBox = Instance.new("TextButton")
+ESPCheckBox.Size = UDim2.new(0, 30, 0, 30)
+ESPCheckBox.Position = UDim2.new(0, 120, 0, 50)
+ESPCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+ESPCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+ESPCheckBox.Text = "☐"
+ESPCheckBox.TextSize = 24
+ESPCheckBox.Font = Enum.Font.SourceSansBold
+ESPCheckBox.Parent = Frame
+
 local Credit = Instance.new("TextLabel")
 Credit.Size = UDim2.new(0, 100, 0, 20)
 Credit.Position = UDim2.new(0, 10, 0, 120)
@@ -63,15 +75,18 @@ local function GetClosestPlayer()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local character = player.Character
-            local screenPoint, onScreen = Camera:WorldToViewportPoint(character.HumanoidRootPart.Position)
-
-            if onScreen then
-                local screenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
-                local distance = (mousePosition - screenPosition).Magnitude
-                
-                if distance < shortestDistance then
-                    shortestDistance = distance
-                    closestPlayer = player
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+            
+            if distance <= maxLockDistance then
+                local screenPoint, onScreen = Camera:WorldToViewportPoint(character.HumanoidRootPart.Position)
+                if onScreen then
+                    local screenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
+                    local mouseDistance = (mousePosition - screenPosition).Magnitude
+                    
+                    if mouseDistance < shortestDistance then
+                        shortestDistance = mouseDistance
+                        closestPlayer = player
+                    end
                 end
             end
         end
@@ -103,27 +118,49 @@ local function ApplyGlowEffect(character, enabled)
     end
 end
 
--- Kamera Güncelleme (Ölüm Kontrolü Eklenmiş)
-local smoothness = 0.2 -- Kamera hareketinin yumuşaklığı
-local shakeIntensity = 0.02 -- Titreşim şiddeti
+-- ESP Ekleme Fonksiyonu
+local function ApplyESP(player, enabled)
+    if player.Character then
+        local character = player.Character
+        local head = character:FindFirstChild("Head")
+        if head then
+            local billboardGui = head:FindFirstChild("BillboardGui")
+            if enabled then
+                if not billboardGui then
+                    billboardGui = Instance.new("BillboardGui")
+                    billboardGui.Name = "BillboardGui"
+                    billboardGui.Adornee = head
+                    billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                    billboardGui.AlwaysOnTop = true
 
+                    local textLabel = Instance.new("TextLabel")
+                    textLabel.Text = player.Name
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.TextColor3 = Color3.fromRGB(128, 0, 128) -- Mor renk
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.Font = Enum.Font.SourceSansBold
+                    textLabel.TextSize = 18
+                    textLabel.Parent = billboardGui
+
+                    billboardGui.Parent = head
+                end
+            else
+                if billboardGui then
+                    billboardGui:Destroy()
+                end
+            end
+        end
+    end
+end
+
+-- Kamera Güncelleme (Smooth olmadan direkt kilitlenme)
 RunService.RenderStepped:Connect(function()
     if isLocked and lockedTarget and lockedTarget.Character and lockedTarget.Character:FindFirstChild("HumanoidRootPart") then
         local humanoid = lockedTarget.Character:FindFirstChild("Humanoid")
-        if humanoid and humanoid.Health > 0 then -- Karakterin canı 0'dan büyükse devam et
+        if humanoid and humanoid.Health > 0 then
             local targetPosition = lockedTarget.Character.HumanoidRootPart.Position
-            local currentCFrame = Camera.CFrame
-            local desiredCFrame = CFrame.new(currentCFrame.Position, targetPosition)
-            
-            -- Rastgele titreşim ekleme
-            local shakeOffset = Vector3.new(
-                (math.random() - 0.5) * shakeIntensity,
-                (math.random() - 0.5) * shakeIntensity,
-                (math.random() - 0.5) * shakeIntensity
-            )
-            
-            -- Yumuşak geçiş
-            Camera.CFrame = currentCFrame:Lerp(desiredCFrame, smoothness) + shakeOffset
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPosition)
         else
             -- Karakter öldüyse camlock'u devre dışı bırak
             isLocked = false
@@ -166,6 +203,17 @@ CheckBox.MouseButton1Click:Connect(function()
     end
 end)
 
+-- ESP CheckBox Butonuna İşlev Ekle
+ESPCheckBox.MouseButton1Click:Connect(function()
+    isESPEnabled = not isESPEnabled
+    ESPCheckBox.Text = isESPEnabled and "☑" or "☐"
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            ApplyESP(player, isESPEnabled)
+        end
+    end
+end)
+
 -- "G" Tuşuna Basılınca Kamera Kilitleme (Eğer tik işaretliyse çalışır)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -174,6 +222,26 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
     if input.KeyCode == Enum.KeyCode.Home then
         guiVisible = not guiVisible
-        Frame.Visible = guiVisible
+        if guiVisible then
+            -- GUI'yi yeniden oluştur
+            if not ScreenGui or not ScreenGui.Parent then
+                ScreenGui = Instance.new("ScreenGui")
+                ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+            end
+            if not Frame or not Frame.Parent then
+                Frame = Instance.new("Frame")
+                Frame.Size = UDim2.new(0, 300, 0, 150)
+                Frame.Position = UDim2.new(0.1, 0, 0.1, 0)
+                Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                Frame.BorderSizePixel = 2
+                Frame.BorderColor3 = Color3.fromRGB(128, 0, 128)
+                Frame.Parent = ScreenGui
+            end
+        else
+            -- GUI'yi kaldır
+            if ScreenGui then
+                ScreenGui:Destroy()
+            end
+        end
     end
 end)
