@@ -186,7 +186,7 @@ local function OnCharacterAdded(player, character)
 end
 
 -- Oyuncuların Karakterleri İçin ESP'yi Ayarla
-for _, player in pairs(Players:GetPlayers()) do
+local function SetupESPForPlayer(player)
     if player ~= LocalPlayer then
         if player.Character then
             ApplyESP(player, isESPEnabled)
@@ -196,6 +196,16 @@ for _, player in pairs(Players:GetPlayers()) do
         end)
     end
 end
+
+-- Mevcut Oyuncular İçin ESP'yi Ayarla
+for _, player in pairs(Players:GetPlayers()) do
+    SetupESPForPlayer(player)
+end
+
+-- Yeni Oyuncular İçin ESP'yi Ayarla
+Players.PlayerAdded:Connect(function(player)
+    SetupESPForPlayer(player)
+end)
 
 -- Kamera Güncelleme (Smooth olmadan direkt kilitlenme)
 RunService.RenderStepped:Connect(function()
