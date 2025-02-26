@@ -9,9 +9,13 @@ local LocalPlayer = Players.LocalPlayer
 local isLocked = false  -- Kamera kilit durumu
 local lockedTarget = nil  -- Kilitlenen oyuncu
 local isCheckBoxEnabled = false  -- Camlock tik durumu
-local isESPEnabled = false  -- ESP tik durumu
 local guiVisible = true -- GUI Açık mı?
 local maxLockDistance = 50 -- Maksimum kilitlenme mesafesi (başlangıç değeri)
+
+-- ESP Ayarları
+local ESPBoxEnabled = false
+local ESPBoxFilledEnabled = false
+local NameESPEnabled = false
 
 -- GUI Oluşturma
 local ScreenGui = Instance.new("ScreenGui")
@@ -142,37 +146,83 @@ local function ApplyGlowEffect(character, enabled)
     end
 end
 
--- ESP Ekleme Fonksiyonu (Sadece İsim)
+-- ESP Ekleme Fonksiyonu (Box, Filled Box, Name ESP)
 local function ApplyESP(player, enabled)
-    if player.Character then
-        local character = player.Character
-        local head = character:FindFirstChild("Head")
-        if head then
+    if not player.Character then return end
+    local character = player.Character
+    local head = character:FindFirstChild("Head")
+    if head then
+        -- ESP Box
+        if ESPBoxEnabled then
+            local box = character:FindFirstChild("ESPBox")
+            if not box then
+                box = Instance.new("BoxHandleAdornment")
+                box.Name = "ESPBox"
+                box.Size = Vector3.new(4, 6, 4)
+                box.Adornee = character.PrimaryPart
+                box.AlwaysOnTop = true
+                box.ZIndex = 10
+                box.Transparency = 0.5
+                box.Color3 = Color3.fromRGB(128, 0, 128)
+                box.Parent = character
+            end
+            box.Visible = enabled
+        else
+            local box = character:FindFirstChild("ESPBox")
+            if box then
+                box:Destroy()
+            end
+        end
+
+        -- ESP Box Filled
+        if ESPBoxFilledEnabled then
+            local boxFilled = character:FindFirstChild("ESPBoxFilled")
+            if not boxFilled then
+                boxFilled = Instance.new("BoxHandleAdornment")
+                boxFilled.Name = "ESPBoxFilled"
+                boxFilled.Size = Vector3.new(4, 6, 4)
+                boxFilled.Adornee = character.PrimaryPart
+                boxFilled.AlwaysOnTop = true
+                boxFilled.ZIndex = 5
+                boxFilled.Transparency = 0.7
+                boxFilled.Color3 = Color3.fromRGB(128, 0, 128)
+                boxFilled.Parent = character
+            end
+            boxFilled.Visible = enabled
+        else
+            local boxFilled = character:FindFirstChild("ESPBoxFilled")
+            if boxFilled then
+                boxFilled:Destroy()
+            end
+        end
+
+        -- Name ESP
+        if NameESPEnabled then
             local billboardGui = head:FindFirstChild("BillboardGui")
-            if enabled then
-                if not billboardGui then
-                    billboardGui = Instance.new("BillboardGui")
-                    billboardGui.Name = "BillboardGui"
-                    billboardGui.Adornee = head
-                    billboardGui.Size = UDim2.new(0, 200, 0, 50)
-                    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
-                    billboardGui.AlwaysOnTop = true
+            if not billboardGui then
+                billboardGui = Instance.new("BillboardGui")
+                billboardGui.Name = "BillboardGui"
+                billboardGui.Adornee = head
+                billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                billboardGui.AlwaysOnTop = true
 
-                    local textLabel = Instance.new("TextLabel")
-                    textLabel.Text = player.Name
-                    textLabel.Size = UDim2.new(1, 0, 1, 0)
-                    textLabel.TextColor3 = Color3.fromRGB(128, 0, 128) -- Mor renk
-                    textLabel.BackgroundTransparency = 1
-                    textLabel.Font = Enum.Font.SourceSansBold
-                    textLabel.TextSize = 18
-                    textLabel.Parent = billboardGui
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Text = player.Name
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.TextColor3 = Color3.fromRGB(128, 0, 128) -- Mor renk
+                textLabel.BackgroundTransparency = 1
+                textLabel.Font = Enum.Font.SourceSansBold
+                textLabel.TextSize = 18
+                textLabel.Parent = billboardGui
 
-                    billboardGui.Parent = head
-                end
-            else
-                if billboardGui then
-                    billboardGui:Destroy()
-                end
+                billboardGui.Parent = head
+            end
+            billboardGui.Enabled = enabled
+        else
+            local billboardGui = head:FindFirstChild("BillboardGui")
+            if billboardGui then
+                billboardGui:Destroy()
             end
         end
     end
@@ -180,16 +230,14 @@ end
 
 -- Oyuncu Yeniden Doğduğunda ESP'yi Güncelle
 local function OnCharacterAdded(player, character)
-    if isESPEnabled then
-        ApplyESP(player, true)
-    end
+    ApplyESP(player, true)
 end
 
 -- Oyuncuların Karakterleri İçin ESP'yi Ayarla
 local function SetupESPForPlayer(player)
     if player ~= LocalPlayer then
         if player.Character then
-            ApplyESP(player, isESPEnabled)
+            ApplyESP(player, true)
         end
         player.CharacterAdded:Connect(function(character)
             OnCharacterAdded(player, character)
@@ -258,11 +306,11 @@ end)
 
 -- ESP CheckBox Butonuna İşlev Ekle
 ESPCheckBox.MouseButton1Click:Connect(function()
-    isESPEnabled = not isESPEnabled
-    ESPCheckBox.Text = isESPEnabled and "☑" or "☐"
+    ESPBoxEnabled = not ESPBoxEnabled
+    ESPCheckBox.Text = ESPBoxEnabled and "☑" or "☐"
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
-            ApplyESP(player, isESPEnabled)
+            ApplyESP(player, ESPBoxEnabled)
         end
     end
 end)
@@ -280,7 +328,7 @@ DistanceTextBox.FocusLost:Connect(function(enterPressed)
 end)
 
 -- "G" Tuşuna Basılınca Kamera Kilitleme (Eğer tik işaretliyse çalışır)
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
+UserInputService.InputBened:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.G and isCheckBoxEnabled then
         ToggleCameraLock()
