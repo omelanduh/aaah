@@ -11,33 +11,24 @@ local lockedTarget = nil  -- Kilitlenen oyuncu
 local isCheckBoxEnabled = false  -- Camlock tik durumu
 local isESPEnabled = false  -- ESP tik durumu
 local guiVisible = true -- GUI Açık mı?
-local maxLockDistance = 50 -- Maksimum kilitlenme mesafesi
+local maxLockDistance = 50 -- Maksimum kilitlenme mesafesi (başlangıç değeri)
 
 -- GUI Oluşturma
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Size = UDim2.new(0, 300, 0, 200) -- Yükseklik artırıldı
 Frame.Position = UDim2.new(0.1, 0, 0.1, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Frame.BorderSizePixel = 2
 Frame.BorderColor3 = Color3.fromRGB(128, 0, 128)
 Frame.Parent = ScreenGui
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 100, 0, 30)
-Title.Position = UDim2.new(0, 10, 0, 10)
-Title.BackgroundTransparency = 1
-Title.Text = "Camlock"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 20
-Title.Font = Enum.Font.SourceSansBold
-Title.Parent = Frame
-
+-- Camlock CheckBox ve Yazısı
 local CheckBox = Instance.new("TextButton")
 CheckBox.Size = UDim2.new(0, 30, 0, 30)
-CheckBox.Position = UDim2.new(0, 120, 0, 10)
+CheckBox.Position = UDim2.new(0, 10, 0, 10)
 CheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
 CheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 CheckBox.Text = "☐"
@@ -45,9 +36,32 @@ CheckBox.TextSize = 24
 CheckBox.Font = Enum.Font.SourceSansBold
 CheckBox.Parent = Frame
 
+local CamlockLabel = Instance.new("TextLabel")
+CamlockLabel.Size = UDim2.new(0, 100, 0, 30)
+CamlockLabel.Position = UDim2.new(0, 50, 0, 10)
+CamlockLabel.BackgroundTransparency = 1
+CamlockLabel.Text = "Camlock"
+CamlockLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+CamlockLabel.TextSize = 18
+CamlockLabel.Font = Enum.Font.SourceSansBold
+CamlockLabel.Parent = Frame
+
+-- Camlock Distance Metin Kutusu (Camlock CheckBox'ının altına)
+local DistanceTextBox = Instance.new("TextBox")
+DistanceTextBox.Size = UDim2.new(0, 150, 0, 30)
+DistanceTextBox.Position = UDim2.new(0, 10, 0, 50)
+DistanceTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+DistanceTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+DistanceTextBox.Text = tostring(maxLockDistance)
+DistanceTextBox.TextSize = 18
+DistanceTextBox.Font = Enum.Font.SourceSansBold
+DistanceTextBox.PlaceholderText = "Camlock Distance"
+DistanceTextBox.Parent = Frame
+
+-- ESP CheckBox ve Yazısı
 local ESPCheckBox = Instance.new("TextButton")
 ESPCheckBox.Size = UDim2.new(0, 30, 0, 30)
-ESPCheckBox.Position = UDim2.new(0, 120, 0, 50)
+ESPCheckBox.Position = UDim2.new(0, 10, 0, 90)
 ESPCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
 ESPCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 ESPCheckBox.Text = "☐"
@@ -55,9 +69,19 @@ ESPCheckBox.TextSize = 24
 ESPCheckBox.Font = Enum.Font.SourceSansBold
 ESPCheckBox.Parent = Frame
 
+local ESPLabel = Instance.new("TextLabel")
+ESPLabel.Size = UDim2.new(0, 100, 0, 30)
+ESPLabel.Position = UDim2.new(0, 50, 0, 90)
+ESPLabel.BackgroundTransparency = 1
+ESPLabel.Text = "ESP"
+ESPLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ESPLabel.TextSize = 18
+ESPLabel.Font = Enum.Font.SourceSansBold
+ESPLabel.Parent = Frame
+
 local Credit = Instance.new("TextLabel")
 Credit.Size = UDim2.new(0, 100, 0, 20)
-Credit.Position = UDim2.new(0, 10, 0, 120)
+Credit.Position = UDim2.new(0, 10, 0, 170)
 Credit.BackgroundTransparency = 1
 Credit.Text = "acne"
 Credit.TextColor3 = Color3.fromRGB(100, 100, 100)
@@ -94,7 +118,7 @@ local function GetClosestPlayer()
     return closestPlayer
 end
 
--- Glow Efekti Ekleme Fonksiyonu
+-- Glow Efekti Ekleme Fonksiyonu (Camlock için)
 local function ApplyGlowEffect(character, enabled)
     for _, part in pairs(character:GetChildren()) do
         if part:IsA("BasePart") then
@@ -118,7 +142,7 @@ local function ApplyGlowEffect(character, enabled)
     end
 end
 
--- ESP Ekleme Fonksiyonu
+-- ESP Ekleme Fonksiyonu (Sadece İsim)
 local function ApplyESP(player, enabled)
     if player.Character then
         local character = player.Character
@@ -151,6 +175,25 @@ local function ApplyESP(player, enabled)
                 end
             end
         end
+    end
+end
+
+-- Oyuncu Yeniden Doğduğunda ESP'yi Güncelle
+local function OnCharacterAdded(player, character)
+    if isESPEnabled then
+        ApplyESP(player, true)
+    end
+end
+
+-- Oyuncuların Karakterleri İçin ESP'yi Ayarla
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        if player.Character then
+            ApplyESP(player, isESPEnabled)
+        end
+        player.CharacterAdded:Connect(function(character)
+            OnCharacterAdded(player, character)
+        end)
     end
 end
 
@@ -214,6 +257,18 @@ ESPCheckBox.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Camlock Distance Metin Kutusu İşlevi
+DistanceTextBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local newDistance = tonumber(DistanceTextBox.Text)
+        if newDistance and newDistance >= 10 and newDistance <= 500 then
+            maxLockDistance = newDistance
+        else
+            DistanceTextBox.Text = tostring(maxLockDistance) -- Geçersiz değer girilirse eski değeri geri yükle
+        end
+    end
+end)
+
 -- "G" Tuşuna Basılınca Kamera Kilitleme (Eğer tik işaretliyse çalışır)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -222,26 +277,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
     if input.KeyCode == Enum.KeyCode.Home then
         guiVisible = not guiVisible
-        if guiVisible then
-            -- GUI'yi yeniden oluştur
-            if not ScreenGui or not ScreenGui.Parent then
-                ScreenGui = Instance.new("ScreenGui")
-                ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-            end
-            if not Frame or not Frame.Parent then
-                Frame = Instance.new("Frame")
-                Frame.Size = UDim2.new(0, 300, 0, 150)
-                Frame.Position = UDim2.new(0.1, 0, 0.1, 0)
-                Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-                Frame.BorderSizePixel = 2
-                Frame.BorderColor3 = Color3.fromRGB(128, 0, 128)
-                Frame.Parent = ScreenGui
-            end
-        else
-            -- GUI'yi kaldır
-            if ScreenGui then
-                ScreenGui:Destroy()
-            end
-        end
+        Frame.Visible = guiVisible
     end
 end)
