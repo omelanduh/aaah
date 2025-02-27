@@ -299,7 +299,7 @@ local function GetClosestPlayer()
     return closestPlayer
 end
 
--- Toggle Camlock on G Key Press
+-- Toggle Camlock on T Key Press
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.T and isCamLockEnabled then
