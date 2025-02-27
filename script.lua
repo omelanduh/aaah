@@ -302,7 +302,7 @@ end
 -- Toggle Camlock on G Key Press
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.G and isCamLockEnabled then
+    if input.KeyCode == Enum.KeyCode.T and isCamLockEnabled then
         if lockedTarget then
             -- Camlock kapatıldı, highlight'ı kaldır
             highlight.Parent = nil
