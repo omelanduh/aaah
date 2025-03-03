@@ -4,6 +4,8 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = game:GetService("Workspace").CurrentCamera
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
 
 -- Variables
 local isESPEnabled = false  -- ESP toggle status
@@ -40,6 +42,7 @@ local Settings = {
 -- GUI Creation
 local ScreenGui, Frame, ESPCheckBox, CamlockCheckBox, DistanceTextBox, BodyPartDropdown
 
+
 local function CreateGUI()
     ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
@@ -48,10 +51,62 @@ local function CreateGUI()
     Frame.Size = UDim2.new(0, 300, 0, 250)  -- Width and height
     Frame.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position on screen
     Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- Background color
-    Frame.BorderSizePixel = 2  -- Border size
+    Frame.BorderSizePixel = 0  -- Border size
     Frame.BorderColor3 = Color3.fromRGB(128, 0, 128)  -- Border color
     Frame.Visible = SavedSettings.GUIVisible  -- GUI durumunu kaydedilen ayardan al
     Frame.Parent = ScreenGui
+	Frame.BackgroundTransparency = 0.1
+
+    -- UICorner ekleyerek kenarları oval yap
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 12)  -- Köşelerin yuvarlaklık derecesi (0-1 arası)
+    UICorner.Parent = Frame
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    -- GUI'yi tutma ve kaydırma fonksiyonları
+    local function UpdateInput(input)
+        local delta = input.Position - dragStart
+        local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        
+        -- Smooth hareket için TweenService kullan
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(Frame, tweenInfo, {Position = newPosition})
+        tween:Play()
+    end
+
+    Frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = Frame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    Frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            UpdateInput(input)
+        end
+    end)
+
+    local function ToggleCheckmark(button, isChecked)
+        local targetColor = isChecked and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)  -- Koyu mor veya normal mor
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(button, tweenInfo, {BackgroundColor3 = targetColor})
+        tween:Play()
+    end
 
     -- ESP CheckBox and Label
     ESPCheckBox = Instance.new("TextButton")
@@ -63,6 +118,11 @@ local function CreateGUI()
     ESPCheckBox.TextSize = 24
     ESPCheckBox.Font = Enum.Font.SourceSansBold
     ESPCheckBox.Parent = Frame
+
+    -- ESPCheckBox için UICorner ekle
+    local ESPCheckBoxCorner = Instance.new("UICorner")
+    ESPCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    ESPCheckBoxCorner.Parent = ESPCheckBox
 
     local ESPLabel = Instance.new("TextLabel")
     ESPLabel.Size = UDim2.new(0, 100, 0, 30)
@@ -84,6 +144,11 @@ local function CreateGUI()
     CamlockCheckBox.TextSize = 24
     CamlockCheckBox.Font = Enum.Font.SourceSansBold
     CamlockCheckBox.Parent = Frame
+
+    -- CamlockCheckBox için UICorner ekle
+    local CamlockCheckBoxCorner = Instance.new("UICorner")
+    CamlockCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    CamlockCheckBoxCorner.Parent = CamlockCheckBox
 
     local CamlockLabel = Instance.new("TextLabel")
     CamlockLabel.Size = UDim2.new(0, 100, 0, 30)
@@ -107,6 +172,11 @@ local function CreateGUI()
     DistanceTextBox.PlaceholderText = "Max Distance (50-500)"
     DistanceTextBox.Parent = Frame
 
+    -- DistanceTextBox için UICorner ekle
+    local DistanceTextBoxCorner = Instance.new("UICorner")
+    DistanceTextBoxCorner.CornerRadius = UDim.new(0, 8)
+    DistanceTextBoxCorner.Parent = DistanceTextBox
+
     -- BodyPart Dropdown
     BodyPartDropdown = Instance.new("TextButton")
     BodyPartDropdown.Size = UDim2.new(0, 150, 0, 30)
@@ -118,11 +188,17 @@ local function CreateGUI()
     BodyPartDropdown.Font = Enum.Font.SourceSansBold
     BodyPartDropdown.Parent = Frame
 
+    -- BodyPartDropdown için UICorner ekle
+    local BodyPartDropdownCorner = Instance.new("UICorner")
+    BodyPartDropdownCorner.CornerRadius = UDim.new(0, 8)
+    BodyPartDropdownCorner.Parent = BodyPartDropdown
+
+
     -- ESP CheckBox Functionality
     ESPCheckBox.MouseButton1Click:Connect(function()
         isESPEnabled = not isESPEnabled
-        ESPCheckBox.Text = isESPEnabled and "☑" or "☐"
         SavedSettings.ESPEnabled = isESPEnabled
+        ToggleCheckmark(ESPCheckBox, isESPEnabled)  -- Renk değişimi animasyonu
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer then
                 -- Reapply ESP for all players
@@ -134,8 +210,8 @@ local function CreateGUI()
     -- Camlock CheckBox Functionality
     CamlockCheckBox.MouseButton1Click:Connect(function()
         isCamLockEnabled = not isCamLockEnabled
-        CamlockCheckBox.Text = isCamLockEnabled and "☑" or "☐"
         SavedSettings.CamLockEnabled = isCamLockEnabled
+        ToggleCheckmark(CamlockCheckBox, isCamLockEnabled)  -- Renk değişimi animasyonu
     end)
 
     -- BodyPart Dropdown Functionality
@@ -186,69 +262,74 @@ end)
 CreateGUI()
 
 -- ESP Function
+-- ESP Function (Sadece İsim)
+-- ESP Function (İsim + Health Bar)
 local function ESP(plr)
     local library = {
-        box = Drawing.new("Quad"),
-        healthbar = Drawing.new("Line"),
-        greenhealth = Drawing.new("Line")
+        name = Drawing.new("Text"),  -- İsim için
+        healthbar = Drawing.new("Line"),  -- Health bar için
+        greenhealth = Drawing.new("Line")  -- Health bar doluluk çubuğu için
     }
 
     -- Initialize ESP elements
-    for _, element in pairs(library) do
-        element.Visible = false
-        element.Color = Settings.Box_Color
-        element.Thickness = Settings.Box_Thickness
-        element.Filled = false
-        element.Transparency = 1
-    end
+    library.name.Visible = isESPEnabled  -- İsim görünürlüğü
+    library.name.Color = Settings.Box_Color  -- İsim rengi
+    library.name.Size = 18  -- İsim boyutu
+    library.name.Center = true  -- Metni merkezle
+    library.name.Outline = true  -- İsime dış çizgi ekle
+    library.name.OutlineColor = Color3.new(0, 0, 0)  -- Dış çizgi rengi (siyah)
+    library.name.Text = plr.Name  -- Oyuncunun ismi
+
+    library.healthbar.Visible = isESPEnabled  -- Health bar görünürlüğü
+    library.healthbar.Color = Color3.fromRGB(255, 0, 0)  -- Health bar rengi (kırmızı)
+    library.healthbar.Thickness = 2  -- Health bar kalınlığı
+
+    library.greenhealth.Visible = isESPEnabled  -- Health bar doluluk çubuğu görünürlüğü
+    library.greenhealth.Color = Color3.fromRGB(0, 255, 0)  -- Doluluk rengi (yeşil)
+    library.greenhealth.Thickness = 2  -- Doluluk çubuğu kalınlığı
 
     -- Update ESP
     local function Updater()
         local connection
         connection = RunService.RenderStepped:Connect(function()
-            if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Head") then
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") then
                 local rootPart = plr.Character.HumanoidRootPart
-                local head = plr.Character.Head
                 local rootPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
-                local headPos = Camera:WorldToViewportPoint(head.Position)
 
                 if onScreen then
-                    local distanceY = math.clamp((Vector2.new(headPos.X, headPos.Y) - Vector2.new(rootPos.X, rootPos.Y)).magnitude, 2, math.huge)
+                    -- İsim pozisyonunu güncelle
+                    library.name.Position = Vector2.new(rootPos.X, rootPos.Y - 30)  -- İsim, karakterin üstünde gözükecek
+                    library.name.Visible = isESPEnabled  -- isESPEnabled'e göre görünürlük ayarla
 
-                    -- Box
-                    library.box.PointA = Vector2.new(rootPos.X + distanceY, rootPos.Y - distanceY * 2)
-                    library.box.PointB = Vector2.new(rootPos.X - distanceY, rootPos.Y - distanceY * 2)
-                    library.box.PointC = Vector2.new(rootPos.X - distanceY, rootPos.Y + distanceY * 2)
-                    library.box.PointD = Vector2.new(rootPos.X + distanceY, rootPos.Y + distanceY * 2)
-                    library.box.Visible = isESPEnabled
+                    -- Health bar pozisyonunu güncelle
+                    local health = plr.Character.Humanoid.Health
+                    local maxHealth = plr.Character.Humanoid.MaxHealth
+                    local healthPercentage = health / maxHealth
+                    local barLength = 50  -- Health bar uzunluğu
+                    local barOffset = Vector2.new(rootPos.X - barLength / 2, rootPos.Y + 20)  -- Health bar pozisyonu
 
-                    -- Health Bar
-                    if Settings.HealthBar then
-                        local health = plr.Character.Humanoid.Health
-                        local maxHealth = plr.Character.Humanoid.MaxHealth
-                        local healthOffset = (health / maxHealth) * (distanceY * 4)
+                    -- Health bar (kırmızı arka plan)
+                    library.healthbar.From = barOffset
+                    library.healthbar.To = Vector2.new(barOffset.X + barLength, barOffset.Y)
+                    library.healthbar.Visible = isESPEnabled
 
-                        library.healthbar.From = Vector2.new(rootPos.X - distanceY - 4, rootPos.Y + distanceY * 2)
-                        library.healthbar.To = Vector2.new(rootPos.X - distanceY - 4, rootPos.Y - distanceY * 2)
-                        library.healthbar.Color = Color3.fromRGB(255, 0, 0)
-                        library.healthbar.Visible = isESPEnabled
-
-                        library.greenhealth.From = Vector2.new(rootPos.X - distanceY - 4, rootPos.Y + distanceY * 2)
-                        library.greenhealth.To = Vector2.new(rootPos.X - distanceY - 4, rootPos.Y + distanceY * 2 - healthOffset)
-                        library.greenhealth.Color = Color3.fromRGB(0, 255, 0)
-                        library.greenhealth.Visible = isESPEnabled
-                    end
+                    -- Health bar doluluk çubuğu (yeşil)
+                    library.greenhealth.From = barOffset
+                    library.greenhealth.To = Vector2.new(barOffset.X + barLength * healthPercentage, barOffset.Y)
+                    library.greenhealth.Visible = isESPEnabled
                 else
-                    for _, element in pairs(library) do
-                        element.Visible = false
-                    end
+                    -- Ekranda değilse gizle
+                    library.name.Visible = false
+                    library.healthbar.Visible = false
+                    library.greenhealth.Visible = false
                 end
             else
-                for _, element in pairs(library) do
-                    element.Visible = false
-                end
+                -- Karakter yoksa gizle
+                library.name.Visible = false
+                library.healthbar.Visible = false
+                library.greenhealth.Visible = false
                 if not Players:FindFirstChild(plr.Name) then
-                    connection:Disconnect()
+                    connection:Disconnect()  -- Oyuncu oyundan ayrıldıysa bağlantıyı kes
                 end
             end
         end)
@@ -256,7 +337,6 @@ local function ESP(plr)
     coroutine.wrap(Updater)()
 end
 
--- Set Up ESP for Existing Players
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
         coroutine.wrap(ESP)(player)
@@ -267,6 +347,13 @@ end
 Players.PlayerAdded:Connect(function(newPlayer)
     if newPlayer ~= LocalPlayer then
         coroutine.wrap(ESP)(newPlayer)
+    end
+end)
+
+-- Yeni oyuncular için ESP ekle
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        OnCharacterAdded(player)
     end
 end)
 
