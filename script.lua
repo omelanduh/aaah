@@ -6,7 +6,6 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
-
 -- Variables
 local isESPEnabled = false  -- ESP toggle status
 local isCamLockEnabled = false  -- Camlock toggle status
@@ -14,6 +13,10 @@ local guiVisible = true  -- GUI visibility (başlangıçta açık)
 local maxLockDistance = 50  -- Maximum lock distance
 local lockedTarget = nil  -- Locked player
 local lockBodyPart = "HumanoidRootPart"  -- Default lock body part (Gövde)
+local isSpeedEnabled = false  -- Hız özelliği aktif mi?
+local isFlyEnabled = false  -- Fly özelliği aktif mi?
+local speedValue = 16  -- Hız değeri (varsayılan: 16)
+local flyForce = 50  -- Fly kuvveti (varsayılan: 50)
 
 -- Ayarları saklamak için tablo
 local SavedSettings = {
@@ -21,7 +24,11 @@ local SavedSettings = {
     CamLockEnabled = false,
     MaxLockDistance = 50,
     LockBodyPart = "HumanoidRootPart",
-    GUIVisible = true
+    GUIVisible = true,
+    SpeedEnabled = false,
+    FlyEnabled = false,
+    SpeedValue = 16,
+    FlyForce = 50
 }
 
 -- Highlight Effect
@@ -40,27 +47,39 @@ local Settings = {
 }
 
 -- GUI Creation
-local ScreenGui, Frame, ESPCheckBox, CamlockCheckBox, DistanceTextBox, BodyPartDropdown
-
+local ScreenGui, Frame, ESPCheckBox, CamlockCheckBox, DistanceTextBox, BodyPartDropdown, SpeedCheckBox, SpeedSlider, FlyCheckBox, FlySlider
 
 local function CreateGUI()
     ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 300, 0, 250)  -- Width and height
+    Frame.Size = UDim2.new(0, 300, 0, 350)  -- Width and height (artırıldı)
     Frame.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position on screen
     Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- Background color
     Frame.BorderSizePixel = 0  -- Border size
     Frame.BorderColor3 = Color3.fromRGB(128, 0, 128)  -- Border color
     Frame.Visible = SavedSettings.GUIVisible  -- GUI durumunu kaydedilen ayardan al
     Frame.Parent = ScreenGui
-	Frame.BackgroundTransparency = 0.1
+    Frame.BackgroundTransparency = 0.1
 
     -- UICorner ekleyerek kenarları oval yap
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 12)  -- Köşelerin yuvarlaklık derecesi (0-1 arası)
     UICorner.Parent = Frame
+
+    local CreditLabel = Instance.new("TextLabel")
+    CreditLabel.Size = UDim2.new(0, 100, 0, 20)
+    CreditLabel.Position = UDim2.new(0, 10, 1, -30)  -- Sol alt köşe
+    CreditLabel.BackgroundTransparency = 1  -- Arka planı şeffaf yap
+    CreditLabel.Text = "ACNE"
+    CreditLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Beyaz renk
+    CreditLabel.TextTransparency = 0.5  -- Saydamlık (0 = tam opak, 1 = tam saydam)
+    CreditLabel.TextSize = 14  -- Yazı boyutu
+    CreditLabel.Font = Enum.Font.SourceSans  -- Yazı fontu
+    CreditLabel.TextXAlignment = Enum.TextXAlignment.Left  -- Yazıyı sola hizala
+    CreditLabel.Parent = Frame
+
     local dragging = false
     local dragInput, dragStart, startPos
 
@@ -193,6 +212,69 @@ local function CreateGUI()
     BodyPartDropdownCorner.CornerRadius = UDim.new(0, 8)
     BodyPartDropdownCorner.Parent = BodyPartDropdown
 
+    -- Speed CheckBox and Slider
+    SpeedCheckBox = Instance.new("TextButton")
+    SpeedCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    SpeedCheckBox.Position = UDim2.new(0, 10, 0, 170)
+    SpeedCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+    SpeedCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedCheckBox.Text = SavedSettings.SpeedEnabled and "☑" or "☐"
+    SpeedCheckBox.TextSize = 24
+    SpeedCheckBox.Font = Enum.Font.SourceSansBold
+    SpeedCheckBox.Parent = Frame
+
+    local SpeedLabel = Instance.new("TextLabel")
+    SpeedLabel.Size = UDim2.new(0, 100, 0, 30)
+    SpeedLabel.Position = UDim2.new(0, 50, 0, 170)
+    SpeedLabel.BackgroundTransparency = 1
+    SpeedLabel.Text = "Speed (C)"
+    SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedLabel.TextSize = 18
+    SpeedLabel.Font = Enum.Font.SourceSansBold
+    SpeedLabel.Parent = Frame
+
+    SpeedSlider = Instance.new("TextBox")
+    SpeedSlider.Size = UDim2.new(0, 150, 0, 30)
+    SpeedSlider.Position = UDim2.new(0, 10, 0, 210)
+    SpeedSlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    SpeedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedSlider.Text = tostring(SavedSettings.SpeedValue)
+    SpeedSlider.TextSize = 18
+    SpeedSlider.Font = Enum.Font.SourceSansBold
+    SpeedSlider.PlaceholderText = "Speed Value (1-100)"
+    SpeedSlider.Parent = Frame
+
+    -- Fly CheckBox and Slider
+    FlyCheckBox = Instance.new("TextButton")
+    FlyCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    FlyCheckBox.Position = UDim2.new(0, 10, 0, 250)
+    FlyCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+    FlyCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FlyCheckBox.Text = SavedSettings.FlyEnabled and "☑" or "☐"
+    FlyCheckBox.TextSize = 24
+    FlyCheckBox.Font = Enum.Font.SourceSansBold
+    FlyCheckBox.Parent = Frame
+
+    local FlyLabel = Instance.new("TextLabel")
+    FlyLabel.Size = UDim2.new(0, 100, 0, 30)
+    FlyLabel.Position = UDim2.new(0, 50, 0, 250)
+    FlyLabel.BackgroundTransparency = 1
+    FlyLabel.Text = "Fly (G)"
+    FlyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FlyLabel.TextSize = 18
+    FlyLabel.Font = Enum.Font.SourceSansBold
+    FlyLabel.Parent = Frame
+
+    FlySlider = Instance.new("TextBox")
+    FlySlider.Size = UDim2.new(0, 150, 0, 30)
+    FlySlider.Position = UDim2.new(0, 10, 0, 290)
+    FlySlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    FlySlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FlySlider.Text = tostring(SavedSettings.FlyForce)
+    FlySlider.TextSize = 18
+    FlySlider.Font = Enum.Font.SourceSansBold
+    FlySlider.PlaceholderText = "Fly Force (1-100)"
+    FlySlider.Parent = Frame
 
     -- ESP CheckBox Functionality
     ESPCheckBox.MouseButton1Click:Connect(function()
@@ -238,6 +320,46 @@ local function CreateGUI()
             end
         end
     end)
+
+    -- Speed CheckBox Functionality
+    SpeedCheckBox.MouseButton1Click:Connect(function()
+        isSpeedEnabled = not isSpeedEnabled
+        SavedSettings.SpeedEnabled = isSpeedEnabled
+        ToggleCheckmark(SpeedCheckBox, isSpeedEnabled)  -- Renk değişimi animasyonu
+    end)
+
+    -- Speed Slider Functionality
+    SpeedSlider.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local newSpeed = tonumber(SpeedSlider.Text)
+            if newSpeed and newSpeed >= 1 and newSpeed <= 100 then
+                speedValue = newSpeed
+                SavedSettings.SpeedValue = speedValue
+            else
+                SpeedSlider.Text = tostring(speedValue)  -- Restore old value if invalid
+            end
+        end
+    end)
+
+    -- Fly CheckBox Functionality
+    FlyCheckBox.MouseButton1Click:Connect(function()
+        isFlyEnabled = not isFlyEnabled
+        SavedSettings.FlyEnabled = isFlyEnabled
+        ToggleCheckmark(FlyCheckBox, isFlyEnabled)  -- Renk değişimi animasyonu
+    end)
+
+    -- Fly Slider Functionality
+    FlySlider.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local newFlyForce = tonumber(FlySlider.Text)
+            if newFlyForce and newFlyForce >= 1 and newFlyForce <= 100 then
+                flyForce = newFlyForce
+                SavedSettings.FlyForce = flyForce
+            else
+                FlySlider.Text = tostring(flyForce)  -- Restore old value if invalid
+            end
+        end
+    end)
 end
 
 -- Toggle GUI with Home Key
@@ -262,8 +384,6 @@ end)
 CreateGUI()
 
 -- ESP Function
--- ESP Function (Sadece İsim)
--- ESP Function (İsim + Health Bar)
 local function ESP(plr)
     local library = {
         name = Drawing.new("Text"),  -- İsim için
@@ -416,5 +536,47 @@ RunService.RenderStepped:Connect(function()
             highlight.Parent = nil
             lockedTarget = nil
         end
+    end
+end)
+
+-- Speed Functionality
+local function ApplySpeed()
+    if isSpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = speedValue
+    else
+        LocalPlayer.Character.Humanoid.WalkSpeed = 16  -- Varsayılan hız
+    end
+end
+
+-- Fly Functionality
+local function FlyPlayer()
+    if isFlyEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = LocalPlayer.Character.HumanoidRootPart
+        rootPart.Velocity = Vector3.new(0, flyForce, 0)  -- Y ekseninde yukarı doğru kuvvet uygula
+    end
+end
+
+-- Speed Toggle with C Key
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.C then
+        isSpeedEnabled = not isSpeedEnabled
+        ApplySpeed()
+    end
+end)
+
+-- Fly Toggle with G Key
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.G then
+        isFlyEnabled = not isFlyEnabled
+    end
+end)
+
+-- Apply Speed and Fly on RenderStep
+RunService.RenderStepped:Connect(function()
+    ApplySpeed()
+    if isFlyEnabled then
+        FlyPlayer()
     end
 end)
