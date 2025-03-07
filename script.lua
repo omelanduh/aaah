@@ -306,27 +306,6 @@ local function CreateGUI()
         end
     end)
 
-    -- Fly CheckBox Functionality
-    FlyCheckBox.MouseButton1Click:Connect(function()
-        isFlyEnabled = not isFlyEnabled
-        SavedSettings.FlyEnabled = isFlyEnabled
-        ToggleCheckmark(FlyCheckBox, isFlyEnabled)  -- Renk değişimi animasyonu
-    end)
-
-    -- Fly Slider Functionality
-    FlySlider.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local newFlyForce = tonumber(FlySlider.Text)
-            if newFlyForce and newFlyForce >= 1 and newFlyForce <= 100 then
-                flyForce = newFlyForce
-                SavedSettings.FlyForce = flyForce
-            else
-                FlySlider.Text = tostring(flyForce)  -- Restore old value if invalid
-            end
-        end
-    end)
-end
-
 -- Toggle GUI with Home Key
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -522,6 +501,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
+RunService.RenderStepped:Connect(function()
+    ApplySpeed()
+    FlyPlayer()
+end)
     if isFlyEnabled then
         FlyPlayer()
     end
