@@ -129,9 +129,9 @@ local function CreateGUI()
     ESPCheckBox = Instance.new("TextButton")
     ESPCheckBox.Size = UDim2.new(0, 30, 0, 30)
     ESPCheckBox.Position = UDim2.new(0, 10, 0, 10)
-    ESPCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+    ESPCheckBox.BackgroundColor3 = SavedSettings.ESPEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
     ESPCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ESPCheckBox.Text = SavedSettings.ESPEnabled and "☑" or "☐"
+    ESPCheckBox.Text = ""  -- Tik kaldırıldı
     ESPCheckBox.TextSize = 24
     ESPCheckBox.Font = Enum.Font.SourceSansBold
     ESPCheckBox.Parent = Frame
@@ -155,9 +155,9 @@ local function CreateGUI()
     CamlockCheckBox = Instance.new("TextButton")
     CamlockCheckBox.Size = UDim2.new(0, 30, 0, 30)
     CamlockCheckBox.Position = UDim2.new(0, 10, 0, 50)
-    CamlockCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+    CamlockCheckBox.BackgroundColor3 = SavedSettings.CamLockEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
     CamlockCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CamlockCheckBox.Text = SavedSettings.CamLockEnabled and "☑" or "☐"
+    CamlockCheckBox.Text = ""  -- Tik kaldırıldı
     CamlockCheckBox.TextSize = 24
     CamlockCheckBox.Font = Enum.Font.SourceSansBold
     CamlockCheckBox.Parent = Frame
@@ -214,9 +214,9 @@ local function CreateGUI()
     SpeedCheckBox = Instance.new("TextButton")
     SpeedCheckBox.Size = UDim2.new(0, 30, 0, 30)
     SpeedCheckBox.Position = UDim2.new(0, 10, 0, 170)
-    SpeedCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+    SpeedCheckBox.BackgroundColor3 = SavedSettings.SpeedEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
     SpeedCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    SpeedCheckBox.Text = SavedSettings.SpeedEnabled and "☑" or "☐"
+    SpeedCheckBox.Text = ""  -- Tik kaldırıldı
     SpeedCheckBox.TextSize = 24
     SpeedCheckBox.Font = Enum.Font.SourceSansBold
     SpeedCheckBox.Parent = Frame
