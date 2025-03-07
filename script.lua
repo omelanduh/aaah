@@ -171,7 +171,7 @@ local function CreateGUI()
     CamlockLabel.Size = UDim2.new(0, 100, 0, 30)
     CamlockLabel.Position = UDim2.new(0, 50, 0, 50)
     CamlockLabel.BackgroundTransparency = 1
-    CamlockLabel.Text = "Camlock(T)"
+    CamlockLabel.Text = "Camlock-T"
     CamlockLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     CamlockLabel.TextSize = 18
     CamlockLabel.Font = Enum.Font.SourceSansBold
@@ -230,7 +230,7 @@ local function CreateGUI()
     SpeedLabel.Size = UDim2.new(0, 100, 0, 30)
     SpeedLabel.Position = UDim2.new(0, 50, 0, 170)
     SpeedLabel.BackgroundTransparency = 1
-    SpeedLabel.Text = "Speed(C)"
+    SpeedLabel.Text = "Speed-C"
     SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     SpeedLabel.TextSize = 18
     SpeedLabel.Font = Enum.Font.SourceSansBold
@@ -284,7 +284,7 @@ local function CreateGUI()
     BodyPartDropdown.MouseButton1Click:Connect(function()
         if lockBodyPart == "HumanoidRootPart" then
             lockBodyPart = "Head"
-            BodyPartDropdown.Text = "BodyPart: Torso"
+            BodyPartDropdown.Text = "BodyPart: Head"
         else
             lockBodyPart = "HumanoidRootPart"
             BodyPartDropdown.Text = "BodyPart: Torso"
