@@ -14,9 +14,7 @@ local maxLockDistance = 50  -- Maximum lock distance
 local lockedTarget = nil  -- Locked player
 local lockBodyPart = "HumanoidRootPart"  -- Default lock body part (Gövde)
 local isSpeedEnabled = false  -- Hız özelliği aktif mi?
-local isFlyEnabled = false  -- Fly özelliği aktif mi?
 local speedValue = 16  -- Hız değeri (varsayılan: 16)
-local flyForce = 50  -- Fly kuvveti (varsayılan: 50)
 
 -- Ayarları saklamak için tablo
 local SavedSettings = {
@@ -26,9 +24,7 @@ local SavedSettings = {
     LockBodyPart = "HumanoidRootPart",
     GUIVisible = true,
     SpeedEnabled = false,
-    FlyEnabled = false,
     SpeedValue = 16,
-    FlyForce = 50
 }
 
 -- Highlight Effect
@@ -47,7 +43,7 @@ local Settings = {
 }
 
 -- GUI Creation
-local ScreenGui, Frame, ESPCheckBox, CamlockCheckBox, DistanceTextBox, BodyPartDropdown, SpeedCheckBox, SpeedSlider, FlyCheckBox, FlySlider
+local ScreenGui, Frame, ESPCheckBox, CamlockCheckBox, DistanceTextBox, BodyPartDropdown, SpeedCheckBox, SpeedSlider
 
 local function CreateGUI()
     ScreenGui = Instance.new("ScreenGui")
@@ -244,37 +240,6 @@ local function CreateGUI()
     SpeedSlider.PlaceholderText = "Speed Value (1-100)"
     SpeedSlider.Parent = Frame
 
-    -- Fly CheckBox and Slider
-    FlyCheckBox = Instance.new("TextButton")
-    FlyCheckBox.Size = UDim2.new(0, 30, 0, 30)
-    FlyCheckBox.Position = UDim2.new(0, 10, 0, 250)
-    FlyCheckBox.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
-    FlyCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FlyCheckBox.Text = SavedSettings.FlyEnabled and "☑" or "☐"
-    FlyCheckBox.TextSize = 24
-    FlyCheckBox.Font = Enum.Font.SourceSansBold
-    FlyCheckBox.Parent = Frame
-
-    local FlyLabel = Instance.new("TextLabel")
-    FlyLabel.Size = UDim2.new(0, 100, 0, 30)
-    FlyLabel.Position = UDim2.new(0, 50, 0, 250)
-    FlyLabel.BackgroundTransparency = 1
-    FlyLabel.Text = "Fly (G)"
-    FlyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FlyLabel.TextSize = 18
-    FlyLabel.Font = Enum.Font.SourceSansBold
-    FlyLabel.Parent = Frame
-
-    FlySlider = Instance.new("TextBox")
-    FlySlider.Size = UDim2.new(0, 150, 0, 30)
-    FlySlider.Position = UDim2.new(0, 10, 0, 290)
-    FlySlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    FlySlider.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FlySlider.Text = tostring(SavedSettings.FlyForce)
-    FlySlider.TextSize = 18
-    FlySlider.Font = Enum.Font.SourceSansBold
-    FlySlider.PlaceholderText = "Fly Force (1-100)"
-    FlySlider.Parent = Frame
 
     -- ESP CheckBox Functionality
     ESPCheckBox.MouseButton1Click:Connect(function()
@@ -548,14 +513,6 @@ local function ApplySpeed()
     end
 end
 
--- Fly Functionality
-local function FlyPlayer()
-    if isFlyEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local rootPart = LocalPlayer.Character.HumanoidRootPart
-        rootPart.Velocity = Vector3.new(0, flyForce, 0)  -- Y ekseninde yukarı doğru kuvvet uygula
-    end
-end
-
 -- Speed Toggle with C Key
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -565,17 +522,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Fly Toggle with G Key
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.G then
-        isFlyEnabled = not isFlyEnabled
-    end
-end)
-
--- Apply Speed and Fly on RenderStep
-RunService.RenderStepped:Connect(function()
-    ApplySpeed()
     if isFlyEnabled then
         FlyPlayer()
     end
