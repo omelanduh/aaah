@@ -503,9 +503,4 @@ end)
 
 RunService.RenderStepped:Connect(function()
     ApplySpeed()
-    FlyPlayer()
-end)
-    if isFlyEnabled then
-        FlyPlayer()
-    end
 end)
