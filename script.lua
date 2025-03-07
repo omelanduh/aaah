@@ -9,22 +9,23 @@ local TweenService = game:GetService("TweenService")
 -- Variables
 local isESPEnabled = false  -- ESP toggle status
 local isCamLockEnabled = false  -- Camlock toggle status
+local isSpeedEnabled = false  -- Speed toggle status
+local isSpeedActive = false  -- Speed active status (C tuşu ile kontrol edilir)
 local guiVisible = true  -- GUI visibility (başlangıçta açık)
 local maxLockDistance = 50  -- Maximum lock distance
 local lockedTarget = nil  -- Locked player
 local lockBodyPart = "HumanoidRootPart"  -- Default lock body part (Gövde)
-local isSpeedEnabled = false  -- Hız özelliği aktif mi?
-local speedValue = 16  -- Hız değeri (varsayılan: 16)
+local speedValue = 16  -- Default speed value
 
 -- Ayarları saklamak için tablo
 local SavedSettings = {
     ESPEnabled = false,
     CamLockEnabled = false,
-    MaxLockDistance = 50,
-    LockBodyPart = "HumanoidRootPart",
-    GUIVisible = true,
     SpeedEnabled = false,
     SpeedValue = 16,
+    MaxLockDistance = 50,
+    LockBodyPart = "HumanoidRootPart",
+    GUIVisible = true
 }
 
 -- Highlight Effect
@@ -50,7 +51,7 @@ local function CreateGUI()
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 300, 0, 350)  -- Width and height (artırıldı)
+    Frame.Size = UDim2.new(0, 300, 0, 300)  -- Width and height
     Frame.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position on screen
     Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- Background color
     Frame.BorderSizePixel = 0  -- Border size
@@ -64,6 +65,7 @@ local function CreateGUI()
     UICorner.CornerRadius = UDim.new(0, 12)  -- Köşelerin yuvarlaklık derecesi (0-1 arası)
     UICorner.Parent = Frame
 
+    -- Sol alt köşeye "ACNE" yazısı ekle
     local CreditLabel = Instance.new("TextLabel")
     CreditLabel.Size = UDim2.new(0, 100, 0, 20)
     CreditLabel.Position = UDim2.new(0, 10, 1, -30)  -- Sol alt köşe
@@ -76,10 +78,10 @@ local function CreateGUI()
     CreditLabel.TextXAlignment = Enum.TextXAlignment.Left  -- Yazıyı sola hizala
     CreditLabel.Parent = Frame
 
+    -- GUI'yi tutma ve kaydırma fonksiyonları
     local dragging = false
     local dragInput, dragStart, startPos
 
-    -- GUI'yi tutma ve kaydırma fonksiyonları
     local function UpdateInput(input)
         local delta = input.Position - dragStart
         local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
@@ -169,7 +171,7 @@ local function CreateGUI()
     CamlockLabel.Size = UDim2.new(0, 100, 0, 30)
     CamlockLabel.Position = UDim2.new(0, 50, 0, 50)
     CamlockLabel.BackgroundTransparency = 1
-    CamlockLabel.Text = "Camlock"
+    CamlockLabel.Text = "Camlock(T)"
     CamlockLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     CamlockLabel.TextSize = 18
     CamlockLabel.Font = Enum.Font.SourceSansBold
@@ -198,7 +200,7 @@ local function CreateGUI()
     BodyPartDropdown.Position = UDim2.new(0, 10, 0, 130)
     BodyPartDropdown.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
     BodyPartDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
-    BodyPartDropdown.Text = "BodyPart: " .. (SavedSettings.LockBodyPart == "HumanoidRootPart" and "Gövde" or "Kafa")
+    BodyPartDropdown.Text = "BodyPart: " .. (SavedSettings.LockBodyPart == "HumanoidRootPart" and "Torso" or "Head")
     BodyPartDropdown.TextSize = 18
     BodyPartDropdown.Font = Enum.Font.SourceSansBold
     BodyPartDropdown.Parent = Frame
@@ -208,7 +210,7 @@ local function CreateGUI()
     BodyPartDropdownCorner.CornerRadius = UDim.new(0, 8)
     BodyPartDropdownCorner.Parent = BodyPartDropdown
 
-    -- Speed CheckBox and Slider
+    -- Speed CheckBox and Label (En alta taşındı)
     SpeedCheckBox = Instance.new("TextButton")
     SpeedCheckBox.Size = UDim2.new(0, 30, 0, 30)
     SpeedCheckBox.Position = UDim2.new(0, 10, 0, 170)
@@ -219,16 +221,22 @@ local function CreateGUI()
     SpeedCheckBox.Font = Enum.Font.SourceSansBold
     SpeedCheckBox.Parent = Frame
 
+    -- SpeedCheckBox için UICorner ekle
+    local SpeedCheckBoxCorner = Instance.new("UICorner")
+    SpeedCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    SpeedCheckBoxCorner.Parent = SpeedCheckBox
+
     local SpeedLabel = Instance.new("TextLabel")
     SpeedLabel.Size = UDim2.new(0, 100, 0, 30)
     SpeedLabel.Position = UDim2.new(0, 50, 0, 170)
     SpeedLabel.BackgroundTransparency = 1
-    SpeedLabel.Text = "Speed (C)"
+    SpeedLabel.Text = "Speed(C)"
     SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     SpeedLabel.TextSize = 18
     SpeedLabel.Font = Enum.Font.SourceSansBold
     SpeedLabel.Parent = Frame
 
+    -- Speed Slider (En alta taşındı)
     SpeedSlider = Instance.new("TextBox")
     SpeedSlider.Size = UDim2.new(0, 150, 0, 30)
     SpeedSlider.Position = UDim2.new(0, 10, 0, 210)
@@ -237,9 +245,13 @@ local function CreateGUI()
     SpeedSlider.Text = tostring(SavedSettings.SpeedValue)
     SpeedSlider.TextSize = 18
     SpeedSlider.Font = Enum.Font.SourceSansBold
-    SpeedSlider.PlaceholderText = "Speed Value (1-100)"
+    SpeedSlider.PlaceholderText = "Speed (16-100)"
     SpeedSlider.Parent = Frame
 
+    -- SpeedSlider için UICorner ekle
+    local SpeedSliderCorner = Instance.new("UICorner")
+    SpeedSliderCorner.CornerRadius = UDim.new(0, 8)
+    SpeedSliderCorner.Parent = SpeedSlider
 
     -- ESP CheckBox Functionality
     ESPCheckBox.MouseButton1Click:Connect(function()
@@ -261,14 +273,21 @@ local function CreateGUI()
         ToggleCheckmark(CamlockCheckBox, isCamLockEnabled)  -- Renk değişimi animasyonu
     end)
 
+    -- Speed CheckBox Functionality
+    SpeedCheckBox.MouseButton1Click:Connect(function()
+        isSpeedEnabled = not isSpeedEnabled
+        SavedSettings.SpeedEnabled = isSpeedEnabled
+        ToggleCheckmark(SpeedCheckBox, isSpeedEnabled)  -- Renk değişimi animasyonu
+    end)
+
     -- BodyPart Dropdown Functionality
     BodyPartDropdown.MouseButton1Click:Connect(function()
         if lockBodyPart == "HumanoidRootPart" then
             lockBodyPart = "Head"
-            BodyPartDropdown.Text = "BodyPart: Kafa"
+            BodyPartDropdown.Text = "BodyPart: Torso"
         else
             lockBodyPart = "HumanoidRootPart"
-            BodyPartDropdown.Text = "BodyPart: Gövde"
+            BodyPartDropdown.Text = "BodyPart: Torso"
         end
         SavedSettings.LockBodyPart = lockBodyPart
     end)
@@ -286,18 +305,11 @@ local function CreateGUI()
         end
     end)
 
-    -- Speed CheckBox Functionality
-    SpeedCheckBox.MouseButton1Click:Connect(function()
-        isSpeedEnabled = not isSpeedEnabled
-        SavedSettings.SpeedEnabled = isSpeedEnabled
-        ToggleCheckmark(SpeedCheckBox, isSpeedEnabled)  -- Renk değişimi animasyonu
-    end)
-
-    -- Speed Slider Functionality
+    -- Update Speed Value
     SpeedSlider.FocusLost:Connect(function(enterPressed)
         if enterPressed then
             local newSpeed = tonumber(SpeedSlider.Text)
-            if newSpeed and newSpeed >= 1 and newSpeed <= 100 then
+            if newSpeed and newSpeed >= 16 and newSpeed <= 100 then
                 speedValue = newSpeed
                 SavedSettings.SpeedValue = speedValue
             else
@@ -305,6 +317,7 @@ local function CreateGUI()
             end
         end
     end)
+end
 
 -- Toggle GUI with Home Key
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -486,21 +499,26 @@ end)
 -- Speed Functionality
 local function ApplySpeed()
     if isSpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = speedValue
-    else
-        LocalPlayer.Character.Humanoid.WalkSpeed = 16  -- Varsayılan hız
+        if isSpeedActive then
+            LocalPlayer.Character.Humanoid.WalkSpeed = speedValue
+        else
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16  -- Default speed
+        end
     end
 end
 
--- Speed Toggle with C Key
+-- Toggle Speed on C Key Press
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.C then
-        isSpeedEnabled = not isSpeedEnabled
+    if input.KeyCode == Enum.KeyCode.C and isSpeedEnabled then
+        isSpeedActive = not isSpeedActive
         ApplySpeed()
     end
 end)
 
+-- Update Speed
 RunService.RenderStepped:Connect(function()
-    ApplySpeed()
+    if isSpeedEnabled then
+        ApplySpeed()
+    end
 end)
