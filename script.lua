@@ -17,6 +17,20 @@ local lockedTarget = nil  -- Locked player
 local lockBodyPart = "HumanoidRootPart"  -- Default lock body part (Gövde)
 local speedValue = 16  -- Default speed value
 
+-- Silent Aim Variables
+local isSilentAimEnabled = false  -- Silent Aim başlangıçta kapalı
+local silentAimCircleRadius = 50  -- FOV daire yarıçapı (başlangıçta 50)
+
+-- FOV Circle
+local silentAimCircle = Drawing.new("Circle")
+silentAimCircle.Visible = false  -- Başlangıçta gizli
+silentAimCircle.Color = Color3.fromRGB(255, 0, 0)  -- Kırmızı renk
+silentAimCircle.Thickness = 2  -- Çizgi kalınlığı
+silentAimCircle.Transparency = 1  -- Saydamlık
+silentAimCircle.Filled = false  -- İçi dolu değil
+silentAimCircle.Radius = silentAimCircleRadius  -- Daire yarıçapı
+silentAimCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)  -- Ekran ortası
+
 -- Ayarları saklamak için tablo
 local SavedSettings = {
     ESPEnabled = false,
@@ -25,7 +39,9 @@ local SavedSettings = {
     SpeedValue = 16,
     MaxLockDistance = 50,
     LockBodyPart = "HumanoidRootPart",
-    GUIVisible = true
+    GUIVisible = true,
+    SilentAimEnabled = false,  -- Silent Aim durumu
+    SilentAimFOV = 50  -- FOV yarıçapı
 }
 
 -- Highlight Effect
@@ -44,14 +60,14 @@ local Settings = {
 }
 
 -- GUI Creation
-local ScreenGui, Frame, ESPCheckBox, CamlockCheckBox, DistanceTextBox, BodyPartDropdown, SpeedCheckBox, SpeedSlider
+local ScreenGui, Frame, ESPCheckBox, CamlockCheckBox, DistanceTextBox, BodyPartDropdown, SpeedCheckBox, SpeedSlider, SilentAimCheckBox, FOVRadiusTextBox
 
 local function CreateGUI()
     ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 300, 0, 300)  -- Width and height
+    Frame.Size = UDim2.new(0, 300, 0, 350)  -- Width and height (Silent Aim için yükseklik arttırıldı)
     Frame.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position on screen
     Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- Background color
     Frame.BorderSizePixel = 0  -- Border size
@@ -134,6 +150,7 @@ local function CreateGUI()
     ESPCheckBox.Text = ""  -- Tik kaldırıldı
     ESPCheckBox.TextSize = 24
     ESPCheckBox.Font = Enum.Font.SourceSansBold
+    ESPCheckBox.AutoButtonColor = false  -- Renk değişimini manuel kontrol et
     ESPCheckBox.Parent = Frame
 
     -- ESPCheckBox için UICorner ekle
@@ -160,6 +177,7 @@ local function CreateGUI()
     CamlockCheckBox.Text = ""  -- Tik kaldırıldı
     CamlockCheckBox.TextSize = 24
     CamlockCheckBox.Font = Enum.Font.SourceSansBold
+    CamlockCheckBox.AutoButtonColor = false  -- Renk değişimini manuel kontrol et
     CamlockCheckBox.Parent = Frame
 
     -- CamlockCheckBox için UICorner ekle
@@ -219,6 +237,7 @@ local function CreateGUI()
     SpeedCheckBox.Text = ""  -- Tik kaldırıldı
     SpeedCheckBox.TextSize = 24
     SpeedCheckBox.Font = Enum.Font.SourceSansBold
+    SpeedCheckBox.AutoButtonColor = false  -- Renk değişimini manuel kontrol et
     SpeedCheckBox.Parent = Frame
 
     -- SpeedCheckBox için UICorner ekle
@@ -253,6 +272,50 @@ local function CreateGUI()
     SpeedSliderCorner.CornerRadius = UDim.new(0, 8)
     SpeedSliderCorner.Parent = SpeedSlider
 
+    -- Silent Aim CheckBox and Label
+    SilentAimCheckBox = Instance.new("TextButton")
+    SilentAimCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    SilentAimCheckBox.Position = UDim2.new(0, 10, 0, 250)
+    SilentAimCheckBox.BackgroundColor3 = SavedSettings.SilentAimEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    SilentAimCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SilentAimCheckBox.Text = ""  -- Tik kaldırıldı
+    SilentAimCheckBox.TextSize = 24
+    SilentAimCheckBox.Font = Enum.Font.SourceSansBold
+    SilentAimCheckBox.AutoButtonColor = false  -- Renk değişimini manuel kontrol et
+    SilentAimCheckBox.Parent = Frame
+
+    -- SilentAimCheckBox için UICorner ekle
+    local SilentAimCheckBoxCorner = Instance.new("UICorner")
+    SilentAimCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    SilentAimCheckBoxCorner.Parent = SilentAimCheckBox
+
+    local SilentAimLabel = Instance.new("TextLabel")
+    SilentAimLabel.Size = UDim2.new(0, 100, 0, 30)
+    SilentAimLabel.Position = UDim2.new(0, 50, 0, 250)
+    SilentAimLabel.BackgroundTransparency = 1
+    SilentAimLabel.Text = "Silent Aim"
+    SilentAimLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SilentAimLabel.TextSize = 18
+    SilentAimLabel.Font = Enum.Font.SourceSansBold
+    SilentAimLabel.Parent = Frame
+
+    -- FOV Radius TextBox
+    FOVRadiusTextBox = Instance.new("TextBox")
+    FOVRadiusTextBox.Size = UDim2.new(0, 150, 0, 30)
+    FOVRadiusTextBox.Position = UDim2.new(0, 10, 0, 290)
+    FOVRadiusTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    FOVRadiusTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FOVRadiusTextBox.Text = tostring(SavedSettings.SilentAimFOV)
+    FOVRadiusTextBox.TextSize = 18
+    FOVRadiusTextBox.Font = Enum.Font.SourceSansBold
+    FOVRadiusTextBox.PlaceholderText = "FOV Radius (10-200)"
+    FOVRadiusTextBox.Parent = Frame
+
+    -- FOVRadiusTextBox için UICorner ekle
+    local FOVRadiusTextBoxCorner = Instance.new("UICorner")
+    FOVRadiusTextBoxCorner.CornerRadius = UDim.new(0, 8)
+    FOVRadiusTextBoxCorner.Parent = FOVRadiusTextBox
+
     -- ESP CheckBox Functionality
     ESPCheckBox.MouseButton1Click:Connect(function()
         isESPEnabled = not isESPEnabled
@@ -278,6 +341,28 @@ local function CreateGUI()
         isSpeedEnabled = not isSpeedEnabled
         SavedSettings.SpeedEnabled = isSpeedEnabled
         ToggleCheckmark(SpeedCheckBox, isSpeedEnabled)  -- Renk değişimi animasyonu
+    end)
+
+    -- Silent Aim CheckBox Functionality
+    SilentAimCheckBox.MouseButton1Click:Connect(function()
+        isSilentAimEnabled = not isSilentAimEnabled
+        SavedSettings.SilentAimEnabled = isSilentAimEnabled
+        ToggleCheckmark(SilentAimCheckBox, isSilentAimEnabled)  -- Renk değişimi animasyonu
+        silentAimCircle.Visible = isSilentAimEnabled  -- FOV dairesini göster/gizle
+    end)
+
+    -- FOV Radius TextBox Functionality
+    FOVRadiusTextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local newFOV = tonumber(FOVRadiusTextBox.Text)
+            if newFOV and newFOV >= 10 and newFOV <= 200 then
+                silentAimCircleRadius = newFOV
+                SavedSettings.SilentAimFOV = newFOV
+                silentAimCircle.Radius = newFOV  -- FOV dairesinin yarıçapını güncelle
+            else
+                FOVRadiusTextBox.Text = tostring(silentAimCircleRadius)  -- Geçersiz değer girilirse eski değeri geri yükle
+            end
+        end
     end)
 
     -- BodyPart Dropdown Functionality
@@ -521,4 +606,52 @@ RunService.RenderStepped:Connect(function()
     if isSpeedEnabled then
         ApplySpeed()
     end
+end)
+
+-- Silent Aim Functionality
+local function GetClosestPlayerToCursor()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+    local mouse = LocalPlayer:GetMouse()
+    local mousePosition = Vector2.new(mouse.X, mouse.Y)
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local character = player.Character
+            local screenPoint, onScreen = Camera:WorldToViewportPoint(character.HumanoidRootPart.Position)
+            if onScreen then
+                local screenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
+                local mouseDistance = (mousePosition - screenPosition).Magnitude
+                
+                if mouseDistance < shortestDistance and mouseDistance <= silentAimCircleRadius then
+                    shortestDistance = mouseDistance
+                    closestPlayer = player
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- CanMacroRemote:FireServer'i override et
+local CanMacroRemote = game:GetService("ReplicatedStorage"):WaitForChild("CanMacroRemote")
+local oldFireServer = CanMacroRemote.FireServer
+CanMacroRemote.FireServer = function(...)
+    if isSilentAimEnabled then
+        local closestPlayer = GetClosestPlayerToCursor()
+        if closestPlayer then
+            local targetPosition = closestPlayer.Character.HumanoidRootPart.Position
+            oldFireServer(CanMacroRemote, targetPosition)
+            return
+        end
+    end
+    oldFireServer(CanMacroRemote, ...)
+end
+
+-- FOV Circle'ı güncelle
+RunService.RenderStepped:Connect(function()
+    local mouse = LocalPlayer:GetMouse()
+    silentAimCircle.Position = Vector2.new(mouse.X, mouse.Y)
+    silentAimCircle.Radius = silentAimCircleRadius
+    silentAimCircle.Visible = isSilentAimEnabled  -- Silent Aim açıksa FOV'u göster
 end)
