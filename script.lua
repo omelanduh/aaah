@@ -293,7 +293,7 @@ local function CreateGUI()
     SilentAimLabel.Size = UDim2.new(0, 100, 0, 30)
     SilentAimLabel.Position = UDim2.new(0, 50, 0, 250)
     SilentAimLabel.BackgroundTransparency = 1
-    SilentAimLabel.Text = "Silent Aim"
+    SilentAimLabel.Text = "Target Aim"
     SilentAimLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     SilentAimLabel.TextSize = 18
     SilentAimLabel.Font = Enum.Font.SourceSansBold
