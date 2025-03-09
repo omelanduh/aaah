@@ -1,1 +1,899 @@
-local v0=game:GetService("Players");local v1=v0.LocalPlayer;local v2=game:GetService("Workspace").CurrentCamera;local v3=game:GetService("RunService");local v4=game:GetService("UserInputService");local v5=game:GetService("TweenService");local v6=false;local v7=false;local v8=false;local v9=false;local v10=true;local v11=50;local v12=nil;local v13="HumanoidRootPart";local v14=373 -(47 + 310) ;local v15=false;local v16=49 + 1 ;local v17=Drawing.new("Circle");v17.Visible=false;v17.Color=Color3.fromRGB(255,0 -0 ,0 -0 );v17.Thickness=2 -0 ;v17.Transparency=1 + 0 ;v17.Filled=false;v17.Radius=v16;v17.Position=Vector2.new(v2.ViewportSize.X/(2 -0) ,v2.ViewportSize.Y/(2 + 0) );local v25={ESPEnabled=false,CamLockEnabled=false,SpeedEnabled=false,SpeedValue=16,MaxLockDistance=1524 -(1329 + 145) ,LockBodyPart="HumanoidRootPart",GUIVisible=true,SilentAimEnabled=false,SilentAimFOV=50};local v26=Instance.new("Highlight");v26.FillColor=Color3.fromRGB(1099 -(140 + 831) ,1850 -(1409 + 441) ,846 -(15 + 703) );v26.FillTransparency=0.5;v26.OutlineColor=Color3.fromRGB(119 + 136 ,255,693 -(262 + 176) );v26.OutlineTransparency=1721 -(345 + 1376) ;v26.Parent=nil;local v32={Box_Color=Color3.fromRGB(943 -(198 + 490) ,0 -0 ,0 -0 ),Box_Thickness=1,HealthBar=true};local v33,v34,v35,v36,v37,v38,v39,v40,v41,v42;local function v43() v33=Instance.new("ScreenGui");v33.Parent=v1:WaitForChild("PlayerGui");v34=Instance.new("Frame");v34.Size=UDim2.new(1206 -(696 + 510) ,629 -329 ,1262 -(1091 + 171) ,57 + 293 );v34.Position=UDim2.new(0.1 -0 ,0 -0 ,374.1 -(123 + 251) ,0 -0 );v34.BackgroundColor3=Color3.fromRGB(718 -(208 + 490) ,2 + 18 ,20);v34.BorderSizePixel=0 + 0 ;v34.BorderColor3=Color3.fromRGB(964 -(660 + 176) ,0 + 0 ,128);v34.Visible=v25.GUIVisible;v34.Parent=v33;v34.BackgroundTransparency=0.1;local v61=Instance.new("UICorner");v61.CornerRadius=UDim.new(202 -(14 + 188) ,12);v61.Parent=v34;local v64=Instance.new("TextLabel");v64.Size=UDim2.new(675 -(534 + 141) ,41 + 59 ,0 + 0 ,20 + 0 );v64.Position=UDim2.new(0,21 -11 ,1 -0 , -(84 -54));v64.BackgroundTransparency=1;v64.Text="ACNE";v64.TextColor3=Color3.fromRGB(137 + 118 ,163 + 92 ,255);v64.TextTransparency=396.5 -(115 + 281) ;v64.TextSize=14;v64.Font=Enum.Font.SourceSans;v64.TextXAlignment=Enum.TextXAlignment.Left;v64.Parent=v34;local v77=false;local v78,v79,v80;local function v81(v245) local v246=0;local v247;local v248;local v249;local v250;while true do if (v246==2) then v250:Play();break;end if (v246==0) then v247=v245.Position-v79 ;v248=UDim2.new(v80.X.Scale,v80.X.Offset + v247.X ,v80.Y.Scale,v80.Y.Offset + v247.Y );v246=2 -1 ;end if (v246==(1 + 0)) then v249=TweenInfo.new(0.2,Enum.EasingStyle.Quad,Enum.EasingDirection.Out);v250=v5:Create(v34,v249,{Position=v248});v246=4 -2 ;end end end v34.InputBegan:Connect(function(v251) if ((v251.UserInputType==Enum.UserInputType.MouseButton1) or (v251.UserInputType==Enum.UserInputType.Touch)) then v77=true;v79=v251.Position;v80=v34.Position;v251.Changed:Connect(function() if (v251.UserInputState==Enum.UserInputState.End) then v77=false;end end);end end);v34.InputChanged:Connect(function(v252) if ((v252.UserInputType==Enum.UserInputType.MouseMovement) or (v252.UserInputType==Enum.UserInputType.Touch)) then v78=v252;end end);v4.InputChanged:Connect(function(v253) if ((v253==v78) and v77) then v81(v253);end end);local function v82(v254,v255) local v256=(v255 and Color3.fromRGB(183 -133 ,867 -(550 + 317) ,50)) or Color3.fromRGB(80,0 -0 ,112 -32 ) ;local v257=TweenInfo.new(0.3 -0 ,Enum.EasingStyle.Quad,Enum.EasingDirection.Out);local v258=v5:Create(v254,v257,{BackgroundColor3=v256});v258:Play();end v35=Instance.new("TextButton");v35.Size=UDim2.new(285 -(134 + 151) ,1695 -(970 + 695) ,0 -0 ,30);v35.Position=UDim2.new(1990 -(582 + 1408) ,34 -24 ,0 -0 ,10);v35.BackgroundColor3=(v25.ESPEnabled and Color3.fromRGB(188 -138 ,0,1874 -(1195 + 629) )) or Color3.fromRGB(105 -25 ,241 -(187 + 54) ,860 -(162 + 618) ) ;v35.TextColor3=Color3.fromRGB(179 + 76 ,170 + 85 ,255);v35.Text="";v35.TextSize=50 -26 ;v35.Font=Enum.Font.SourceSansBold;v35.AutoButtonColor=false;v35.Parent=v34;local v93=Instance.new("UICorner");v93.CornerRadius=UDim.new(0 -0 ,8);v93.Parent=v35;local v96=Instance.new("TextLabel");v96.Size=UDim2.new(0,8 + 92 ,1636 -(1373 + 263) ,1030 -(451 + 549) );v96.Position=UDim2.new(0,16 + 34 ,0,15 -5 );v96.BackgroundTransparency=1 -0 ;v96.Text="ESP";v96.TextColor3=Color3.fromRGB(255,255,1639 -(746 + 638) );v96.TextSize=7 + 11 ;v96.Font=Enum.Font.SourceSansBold;v96.Parent=v34;v36=Instance.new("TextButton");v36.Size=UDim2.new(0 -0 ,30,341 -(218 + 123) ,1611 -(1535 + 46) );v36.Position=UDim2.new(0 + 0 ,2 + 8 ,560 -(306 + 254) ,4 + 46 );v36.BackgroundColor3=(v25.CamLockEnabled and Color3.fromRGB(50,0,50)) or Color3.fromRGB(157 -77 ,1467 -(899 + 568) ,53 + 27 ) ;v36.TextColor3=Color3.fromRGB(617 -362 ,858 -(268 + 335) ,545 -(60 + 230) );v36.Text="";v36.TextSize=596 -(426 + 146) ;v36.Font=Enum.Font.SourceSansBold;v36.AutoButtonColor=false;v36.Parent=v34;local v114=Instance.new("UICorner");v114.CornerRadius=UDim.new(0,8);v114.Parent=v36;local v117=Instance.new("TextLabel");v117.Size=UDim2.new(0 + 0 ,100,1456 -(282 + 1174) ,841 -(569 + 242) );v117.Position=UDim2.new(0 -0 ,3 + 47 ,1024 -(706 + 318) ,1301 -(721 + 530) );v117.BackgroundTransparency=1272 -(945 + 326) ;v117.Text="Camlock-T";v117.TextColor3=Color3.fromRGB(637 -382 ,227 + 28 ,955 -(271 + 429) );v117.TextSize=18;v117.Font=Enum.Font.SourceSansBold;v117.Parent=v34;v37=Instance.new("TextBox");v37.Size=UDim2.new(0 + 0 ,1650 -(1408 + 92) ,1086 -(461 + 625) ,1318 -(993 + 295) );v37.Position=UDim2.new(0,1 + 9 ,0,1261 -(418 + 753) );v37.BackgroundColor3=Color3.fromRGB(60,60,60);v37.TextColor3=Color3.fromRGB(255,98 + 157 ,255);v37.Text=tostring(v25.MaxLockDistance);v37.TextSize=2 + 16 ;v37.Font=Enum.Font.SourceSansBold;v37.PlaceholderText="Max Distance (50-500)";v37.Parent=v34;local v135=Instance.new("UICorner");v135.CornerRadius=UDim.new(0,3 + 5 );v135.Parent=v37;v38=Instance.new("TextButton");v38.Size=UDim2.new(0 + 0 ,679 -(406 + 123) ,0,1799 -(1749 + 20) );v38.Position=UDim2.new(0 + 0 ,1332 -(1249 + 73) ,0,47 + 83 );v38.BackgroundColor3=Color3.fromRGB(80,1145 -(466 + 679) ,192 -112 );v38.TextColor3=Color3.fromRGB(255,729 -474 ,255);v38.Text="BodyPart: "   .. (((v25.LockBodyPart=="HumanoidRootPart") and "Torso") or "Head") ;v38.TextSize=1918 -(106 + 1794) ;v38.Font=Enum.Font.SourceSansBold;v38.Parent=v34;local v146=Instance.new("UICorner");v146.CornerRadius=UDim.new(0,3 + 5 );v146.Parent=v38;v39=Instance.new("TextButton");v39.Size=UDim2.new(0 + 0 ,88 -58 ,0 -0 ,30);v39.Position=UDim2.new(114 -(4 + 110) ,10,584 -(57 + 527) ,1597 -(41 + 1386) );v39.BackgroundColor3=(v25.SpeedEnabled and Color3.fromRGB(50,103 -(17 + 86) ,34 + 16 )) or Color3.fromRGB(178 -98 ,0 -0 ,246 -(122 + 44) ) ;v39.TextColor3=Color3.fromRGB(440 -185 ,255,845 -590 );v39.Text="";v39.TextSize=20 + 4 ;v39.Font=Enum.Font.SourceSansBold;v39.AutoButtonColor=false;v39.Parent=v34;local v158=Instance.new("UICorner");v158.CornerRadius=UDim.new(0 + 0 ,16 -8 );v158.Parent=v39;local v161=Instance.new("TextLabel");v161.Size=UDim2.new(65 -(30 + 35) ,69 + 31 ,0,1287 -(1043 + 214) );v161.Position=UDim2.new(0 -0 ,1262 -(323 + 889) ,0 -0 ,170);v161.BackgroundTransparency=581 -(361 + 219) ;v161.Text="Speed-C";v161.TextColor3=Color3.fromRGB(255,255,575 -(53 + 267) );v161.TextSize=5 + 13 ;v161.Font=Enum.Font.SourceSansBold;v161.Parent=v34;v40=Instance.new("TextBox");v40.Size=UDim2.new(0,563 -(15 + 398) ,982 -(18 + 964) ,30);v40.Position=UDim2.new(0,37 -27 ,0,210);v40.BackgroundColor3=Color3.fromRGB(35 + 25 ,38 + 22 ,910 -(20 + 830) );v40.TextColor3=Color3.fromRGB(255,255,255);v40.Text=tostring(v25.SpeedValue);v40.TextSize=18;v40.Font=Enum.Font.SourceSansBold;v40.PlaceholderText="Speed (16-100)";v40.Parent=v34;local v179=Instance.new("UICorner");v179.CornerRadius=UDim.new(0 + 0 ,8);v179.Parent=v40;v41=Instance.new("TextButton");v41.Size=UDim2.new(126 -(116 + 10) ,3 + 27 ,738 -(542 + 196) ,30);v41.Position=UDim2.new(0 -0 ,3 + 7 ,0,128 + 122 );v41.BackgroundColor3=(v25.SilentAimEnabled and Color3.fromRGB(18 + 32 ,0,131 -81 )) or Color3.fromRGB(205 -125 ,1551 -(1126 + 425) ,485 -(118 + 287) ) ;v41.TextColor3=Color3.fromRGB(999 -744 ,1376 -(118 + 1003) ,746 -491 );v41.Text="";v41.TextSize=401 -(142 + 235) ;v41.Font=Enum.Font.SourceSansBold;v41.AutoButtonColor=false;v41.Parent=v34;local v191=Instance.new("UICorner");v191.CornerRadius=UDim.new(0 -0 ,2 + 6 );v191.Parent=v41;local v194=Instance.new("TextLabel");v194.Size=UDim2.new(977 -(553 + 424) ,189 -89 ,0 + 0 ,30 + 0 );v194.Position=UDim2.new(0 + 0 ,50,0 + 0 ,250);v194.BackgroundTransparency=1 + 0 ;v194.Text="Target Aim";v194.TextColor3=Color3.fromRGB(552 -297 ,710 -455 ,570 -315 );v194.TextSize=18;v194.Font=Enum.Font.SourceSansBold;v194.Parent=v34;v42=Instance.new("TextBox");v42.Size=UDim2.new(0,44 + 106 ,0 -0 ,783 -(239 + 514) );v42.Position=UDim2.new(0 + 0 ,1339 -(797 + 532) ,0 + 0 ,98 + 192 );v42.BackgroundColor3=Color3.fromRGB(141 -81 ,60,1262 -(373 + 829) );v42.TextColor3=Color3.fromRGB(255,986 -(476 + 255) ,255);v42.Text=tostring(v25.SilentAimFOV);v42.TextSize=1148 -(369 + 761) ;v42.Font=Enum.Font.SourceSansBold;v42.PlaceholderText="FOV Radius (10-200)";v42.Parent=v34;local v212=Instance.new("UICorner");v212.CornerRadius=UDim.new(0 + 0 ,14 -6 );v212.Parent=v42;v35.MouseButton1Click:Connect(function() local v259=0;while true do if (1==v259) then v82(v35,v6);for v309,v310 in pairs(v0:GetPlayers()) do if (v310~=v1) then coroutine.wrap(ESP)(v310);end end break;end if (v259==(0 -0)) then v6= not v6;v25.ESPEnabled=v6;v259=239 -(64 + 174) ;end end end);v36.MouseButton1Click:Connect(function() local v260=0 + 0 ;while true do if (v260==(1 -0)) then v82(v36,v7);break;end if (v260==(336 -(144 + 192))) then v7= not v7;v25.CamLockEnabled=v7;v260=217 -(42 + 174) ;end end end);v39.MouseButton1Click:Connect(function() v8= not v8;v25.SpeedEnabled=v8;v82(v39,v8);end);v41.MouseButton1Click:Connect(function() local v262=0 + 0 ;local v263;while true do if (v262==(0 + 0)) then v263=0;while true do if (v263==1) then v82(v41,v15);v17.Visible=v15;break;end if ((0 + 0)==v263) then v15= not v15;v25.SilentAimEnabled=v15;v263=1;end end break;end end end);v42.FocusLost:Connect(function(v264) if v264 then local v276=1504 -(363 + 1141) ;local v277;while true do if (v276==0) then v277=tonumber(v42.Text);if (v277 and (v277>=(1590 -(1183 + 397))) and (v277<=(608 -408))) then local v339=0 + 0 ;local v340;while true do if (v339==(0 + 0)) then v340=1975 -(1913 + 62) ;while true do if (v340==1) then v17.Radius=v277;break;end if ((0 + 0)==v340) then v16=v277;v25.SilentAimFOV=v277;v340=2 -1 ;end end break;end end else v42.Text=tostring(v16);end break;end end end end);v38.MouseButton1Click:Connect(function() if (v13=="HumanoidRootPart") then local v278=1933 -(565 + 1368) ;while true do if (v278==0) then v13="Head";v38.Text="BodyPart: Head";break;end end else local v279=0;local v280;while true do if (v279==0) then v280=0 -0 ;while true do if (v280==0) then v13="HumanoidRootPart";v38.Text="BodyPart: Torso";break;end end break;end end end v25.LockBodyPart=v13;end);v37.FocusLost:Connect(function(v266) if v266 then local v281=1661 -(1477 + 184) ;local v282;while true do if (v281==(0 -0)) then v282=tonumber(v37.Text);if (v282 and (v282>=(47 + 3)) and (v282<=(1356 -(564 + 292)))) then local v342=0;local v343;while true do if (v342==(0 -0)) then v343=0 -0 ;while true do if (v343==(304 -(244 + 60))) then v11=v282;v25.MaxLockDistance=v11;break;end end break;end end else v37.Text=tostring(v11);end break;end end end end);v40.FocusLost:Connect(function(v267) if v267 then local v283=0;local v284;while true do if (v283==0) then v284=tonumber(v40.Text);if (v284 and (v284>=(13 + 3)) and (v284<=100)) then local v345=476 -(41 + 435) ;while true do if (v345==(1001 -(938 + 63))) then v14=v284;v25.SpeedValue=v14;break;end end else v40.Text=tostring(v14);end break;end end end end);end v4.InputBegan:Connect(function(v215,v216) local v217=0;while true do if (0==v217) then if v216 then return;end if (v215.KeyCode==Enum.KeyCode.Insert) then local v311=0 + 0 ;while true do if (v311==(1125 -(936 + 189))) then v25.GUIVisible= not v25.GUIVisible;v34.Visible=v25.GUIVisible;break;end end end break;end end end);v1.CharacterAdded:Connect(function() local v218=0;while true do if (v218==(1 + 0)) then v43();break;end if (v218==0) then wait(1614 -(1565 + 48) );if v33 then v33:Destroy();end v218=1 + 0 ;end end end);v43();local function v44(v219) local v220=1138 -(782 + 356) ;local v221;local v222;while true do if (v220==(269 -(176 + 91))) then local v285=0 -0 ;while true do if ((1 -0)==v285) then v221.healthbar.Visible=v6;v220=1095 -(975 + 117) ;break;end if (v285==(1875 -(157 + 1718))) then v221.name.OutlineColor=Color3.new(0 + 0 ,0 -0 ,0);v221.name.Text=v219.Name;v285=3 -2 ;end end end if (v220==(1022 -(697 + 321))) then v221.greenhealth.Color=Color3.fromRGB(0,694 -439 ,0);v221.greenhealth.Thickness=3 -1 ;v222=nil;v220=11 -6 ;end if (v220==0) then v221={name=Drawing.new("Text"),healthbar=Drawing.new("Line"),greenhealth=Drawing.new("Line")};v221.name.Visible=v6;v221.name.Color=v32.Box_Color;v220=1 + 0 ;end if (v220==1) then v221.name.Size=18;v221.name.Center=true;v221.name.Outline=true;v220=3 -1 ;end if (v220==(7 -4)) then local v294=1227 -(322 + 905) ;while true do if (v294==(612 -(602 + 9))) then v221.greenhealth.Visible=v6;v220=1193 -(449 + 740) ;break;end if (v294==0) then v221.healthbar.Color=Color3.fromRGB(1127 -(826 + 46) ,947 -(245 + 702) ,0);v221.healthbar.Thickness=6 -4 ;v294=1 + 0 ;end end end if (v220==(1903 -(260 + 1638))) then function v222() local v306;v306=v3.RenderStepped:Connect(function() if (v219.Character and v219.Character:FindFirstChild("Humanoid") and v219.Character:FindFirstChild("HumanoidRootPart")) then local v329=0;local v330;local v331;local v332;while true do if (0==v329) then v330=v219.Character.HumanoidRootPart;v331,v332=v2:WorldToViewportPoint(v330.Position);v329=441 -(382 + 58) ;end if (v329==1) then if v332 then v221.name.Position=Vector2.new(v331.X,v331.Y-(96 -66) );v221.name.Visible=v6;local v369=v219.Character.Humanoid.Health;local v370=v219.Character.Humanoid.MaxHealth;local v371=v369/v370 ;local v372=42 + 8 ;local v373=Vector2.new(v331.X-(v372/(3 -1)) ,v331.Y + 20 );v221.healthbar.From=v373;v221.healthbar.To=Vector2.new(v373.X + v372 ,v373.Y);v221.healthbar.Visible=v6;v221.greenhealth.From=v373;v221.greenhealth.To=Vector2.new(v373.X + (v372 * v371) ,v373.Y);v221.greenhealth.Visible=v6;else local v380=0 -0 ;local v381;while true do if (v380==0) then v381=1205 -(902 + 303) ;while true do if (v381==(0 -0)) then v221.name.Visible=false;v221.healthbar.Visible=false;v381=1;end if (v381==(2 -1)) then v221.greenhealth.Visible=false;break;end end break;end end end break;end end else local v333=0 + 0 ;while true do if ((1690 -(1121 + 569))==v333) then v221.name.Visible=false;v221.healthbar.Visible=false;v333=215 -(22 + 192) ;end if (v333==1) then v221.greenhealth.Visible=false;if  not v0:FindFirstChild(v219.Name) then v306:Disconnect();end break;end end end end);end coroutine.wrap(v222)();break;end end end for v223,v224 in pairs(v0:GetPlayers()) do if (v224~=v1) then coroutine.wrap(v44)(v224);end end v0.PlayerAdded:Connect(function(v225) if (v225~=v1) then coroutine.wrap(v44)(v225);end end);v0.PlayerAdded:Connect(function(v226) if (v226~=v1) then OnCharacterAdded(v226);end end);local function v45() local v227=nil;local v228=math.huge;local v229=v1:GetMouse();local v230=Vector2.new(v229.X,v229.Y);for v268,v269 in pairs(v0:GetPlayers()) do if ((v269~=v1) and v269.Character and v269.Character:FindFirstChild(v13)) then local v295=v269.Character;local v296=(v1.Character.HumanoidRootPart.Position-v295.HumanoidRootPart.Position).Magnitude;if (v296<=v11) then local v312=0;local v313;local v314;while true do if (v312==(683 -(483 + 200))) then v313,v314=v2:WorldToViewportPoint(v295[v13].Position);if v314 then local v358=1463 -(1404 + 59) ;local v359;local v360;local v361;while true do if (v358==(0 -0)) then v359=0;v360=nil;v358=1;end if ((1 -0)==v358) then v361=nil;while true do if ((766 -(468 + 297))==v359) then if (v361<v228) then local v393=562 -(334 + 228) ;while true do if (v393==0) then v228=v361;v227=v269;break;end end end break;end if (v359==(0 -0)) then v360=Vector2.new(v313.X,v313.Y);v361=(v230-v360).Magnitude;v359=2 -1 ;end end break;end end end break;end end end end end return v227;end v4.InputBegan:Connect(function(v231,v232) local v233=0 -0 ;local v234;while true do if (v233==(0 + 0)) then v234=236 -(141 + 95) ;while true do if (v234==(0 + 0)) then if v232 then return;end if ((v231.KeyCode==Enum.KeyCode.T) and v7) then if v12 then local v362=0;local v363;while true do if (v362==0) then v363=0 -0 ;while true do if ((0 -0)==v363) then v26.Parent=nil;v12=nil;break;end end break;end end else local v364=0 + 0 ;while true do if ((0 -0)==v364) then v12=v45();if (v12 and v12.Character) then v26.Parent=v12.Character;end break;end end end end break;end end break;end end end);v3.RenderStepped:Connect(function() if (v7 and v12 and v12.Character and v12.Character:FindFirstChild(v13)) then local v272=0 + 0 ;local v273;while true do if (v272==(0 + 0)) then v273=v12.Character:FindFirstChild("Humanoid");if (v273 and (v273.Health>(0 -0))) then local v334=v12.Character[v13].Position;v2.CFrame=CFrame.new(v2.CFrame.Position,v334);else v26.Parent=nil;v12=nil;end break;end end end end);local function v46() if (v8 and v1.Character and v1.Character:FindFirstChild("Humanoid")) then if v9 then v1.Character.Humanoid.WalkSpeed=v14;else v1.Character.Humanoid.WalkSpeed=16;end end end v4.InputBegan:Connect(function(v235,v236) local v237=0 + 0 ;while true do if (v237==(163 -(92 + 71))) then if v236 then return;end if ((v235.KeyCode==Enum.KeyCode.C) and v8) then local v315=0;while true do if (v315==0) then v9= not v9;v46();break;end end end break;end end end);v3.RenderStepped:Connect(function() if v8 then v46();end end);local function v47() local v238=nil;local v239=math.huge;local v240=v1:GetMouse();local v241=Vector2.new(v240.X,v240.Y);for v270,v271 in pairs(v0:GetPlayers()) do if ((v271~=v1) and v271.Character and v271.Character:FindFirstChild("HumanoidRootPart")) then local v297=0 + 0 ;local v298;local v299;local v300;while true do if (v297==1) then if v300 then local v349=0 -0 ;local v350;local v351;while true do if (v349==(766 -(574 + 191))) then if ((v351<v239) and (v351<=v16)) then v239=v351;v238=v271;end break;end if (v349==0) then v350=Vector2.new(v299.X,v299.Y);v351=(v241-v350).Magnitude;v349=1 + 0 ;end end end break;end if (v297==(0 -0)) then v298=v271.Character;v299,v300=v2:WorldToViewportPoint(v298.HumanoidRootPart.Position);v297=1;end end end end return v238;end local v48=game:GetService("ReplicatedStorage"):WaitForChild("CanMacroRemote");local v49=v48.FireServer;v48.FireServer=function(...) local v242=0 + 0 ;while true do if (v242==0) then if v15 then local v316=v47();if v316 then local v337=849 -(254 + 595) ;local v338;while true do local v352=126 -(55 + 71) ;while true do if (v352==0) then if (v337==(0 -0)) then v338=v316.Character.HumanoidRootPart.Position;v49(v48,v338);v337=1791 -(573 + 1217) ;end if (v337==(2 -1)) then return;end break;end end end end end v49(v48,...);break;end end end;v3.RenderStepped:Connect(function() local v243=0;local v244;while true do if (v243==(1 + 0)) then v17.Radius=v16;v17.Visible=v15;break;end if (v243==(0 -0)) then local v303=939 -(714 + 225) ;while true do if (v303==0) then v244=v1:GetMouse();v17.Position=Vector2.new(v244.X,v244.Y);v303=1;end if (v303==(2 -1)) then v243=1 -0 ;break;end end end end end);
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = game:GetService("Workspace").CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+-- Variables
+local isESPEnabled = false  -- ESP toggle status
+local isSkeletonESPEnabled = false  -- Skeleton ESP toggle status
+local isCamLockEnabled = false  -- Camlock toggle status
+local isSpeedEnabled = false  -- Speed toggle status
+local isSpeedActive = false  -- Speed active status
+local guiVisible = true  -- GUI visibility
+local maxLockDistance = 50  -- Maximum lock distance
+local lockedTarget = nil  -- Locked player
+local lockBodyPart = "HumanoidRootPart"  -- Default lock body part
+local speedValue = 16  -- Default speed value
+local isHealthBarEnabled = false  -- Health Bar toggle status
+local predictionValue = 0.1  -- Prediction value for camlock
+
+-- Keybinds
+local camlockKey = Enum.KeyCode.T  -- Default camlock key
+local speedKey = Enum.KeyCode.C  -- Default speed key
+local espKey = Enum.KeyCode.E  -- Default ESP key
+
+-- Ayarları saklamak için tablo
+local SavedSettings = {
+    ESPEnabled = false,
+    SkeletonESPEnabled = false,
+    CamLockEnabled = false,
+    SpeedEnabled = false,
+    SpeedValue = 16,
+    MaxLockDistance = 50,
+    LockBodyPart = "HumanoidRootPart",
+    GUIVisible = true,
+    HealthBarEnabled = false,
+    CamlockKey = "T",  -- Default camlock key
+    SpeedKey = "C",  -- Default speed key,
+    ESPKey = "E",  -- Default ESP key
+    PredictionValue = 0.1  -- Default prediction value
+}
+
+-- Highlight Effect
+local highlight = Instance.new("Highlight")
+highlight.FillColor = Color3.fromRGB(128, 0, 128)  -- Mor renk
+highlight.FillTransparency = 0.5  -- Saydamlık
+highlight.OutlineColor = Color3.fromRGB(255, 255, 255)  -- Beyaz dış çizgi
+highlight.OutlineTransparency = 0  -- Dış çizgi saydamlığı
+highlight.Parent = nil  -- Başlangıçta hiçbir şeye bağlı değil
+
+-- ESP Settings
+local Settings = {
+    Box_Color = Color3.fromRGB(255, 0, 0),  -- Box color
+    Box_Thickness = 1,  -- Box thickness
+    HealthBar = false  -- Health bar visibility
+}
+
+-- GUI Creation
+local ScreenGui, MainFrame, Tabs, AimbotTab, PlayerTab, VisualTab
+
+local function CreateGUI()
+    ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+    MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 400, 0, 400)  -- Width and height
+    MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position on screen
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- Background color
+    MainFrame.BorderSizePixel = 0  -- Border size
+    MainFrame.BorderColor3 = Color3.fromRGB(128, 0, 128)  -- Border color
+    MainFrame.Visible = SavedSettings.GUIVisible  -- GUI durumunu kaydedilen ayardan al
+    MainFrame.Parent = ScreenGui
+    MainFrame.BackgroundTransparency = 0.8  -- Saydamlık (daha saydam)
+
+    -- UICorner ekleyerek kenarları oval yap
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 12)  -- Köşelerin yuvarlaklık derecesi
+    UICorner.Parent = MainFrame
+
+    -- Sol alt köşeye "ACNE" yazısı ekle (credit gibi)
+    local CreditLabel = Instance.new("TextLabel")
+    CreditLabel.Size = UDim2.new(0, 100, 0, 20)
+    CreditLabel.Position = UDim2.new(0, 10, 1, -30)  -- Sol alt köşe
+    CreditLabel.BackgroundTransparency = 1  -- Arka planı şeffaf yap
+    CreditLabel.Text = "made by ACNE"
+    CreditLabel.TextColor3 = Color3.fromRGB(255, 131, 239)  -- Beyaz renk
+    CreditLabel.TextTransparency = 0  -- Saydamlık (0 = tam opak, 1 = tam saydam)
+    CreditLabel.TextSize = 20  -- Yazı boyutu
+    CreditLabel.Font = Enum.Font.SourceSansBold  -- Yazı fontu
+    CreditLabel.TextXAlignment = Enum.TextXAlignment.Left  -- Yazıyı sola hizala
+    CreditLabel.Parent = MainFrame
+
+    -- Tabs
+    Tabs = Instance.new("Frame")
+    Tabs.Size = UDim2.new(0, 400, 0, 40)
+    Tabs.Position = UDim2.new(0, 0, 0, 0)
+    Tabs.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Tabs.BorderSizePixel = 0
+    Tabs.Parent = MainFrame
+
+    -- UICorner ekleyerek kenarları oval yap
+    local TabsCorner = Instance.new("UICorner")
+    TabsCorner.CornerRadius = UDim.new(0, 12)
+    TabsCorner.Parent = Tabs
+
+    -- Tab Buttons
+    local function CreateTabButton(name, position)
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, 100, 0, 40)
+        button.Position = position
+        button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Text = name
+        button.TextSize = 14
+        button.Font = Enum.Font.SourceSansBold
+        button.AutoButtonColor = false
+        button.Parent = Tabs
+
+        -- UICorner ekleyerek kenarları oval yap
+        local buttonCorner = Instance.new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 8)
+        buttonCorner.Parent = button
+
+        return button
+    end
+
+    local AimbotTabButton = CreateTabButton("Aimbot", UDim2.new(0, 0, 0, 0))
+    local PlayerTabButton = CreateTabButton("Player", UDim2.new(0, 100, 0, 0))
+    local VisualTabButton = CreateTabButton("Visual", UDim2.new(0, 200, 0, 0))
+
+    -- Tab Frames
+    AimbotTab = Instance.new("Frame")
+    AimbotTab.Size = UDim2.new(0, 400, 0, 360)
+    AimbotTab.Position = UDim2.new(0, 0, 0, 40)
+    AimbotTab.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    AimbotTab.Visible = true
+    AimbotTab.Parent = MainFrame
+    AimbotTab.BackgroundTransparency = 0.1
+
+    -- AimbotTab için UICorner ekle
+    local AimbotTabCorner = Instance.new("UICorner")
+    AimbotTabCorner.CornerRadius = UDim.new(0, 12)
+    AimbotTabCorner.Parent = AimbotTab
+
+    PlayerTab = Instance.new("Frame")
+    PlayerTab.Size = UDim2.new(0, 400, 0, 360)
+    PlayerTab.Position = UDim2.new(0, 0, 0, 40)
+    PlayerTab.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    PlayerTab.Visible = false
+    PlayerTab.Parent = MainFrame
+    PlayerTab.BackgroundTransparency = 0.1
+
+    -- PlayerTab için UICorner ekle
+    local PlayerTabCorner = Instance.new("UICorner")
+    PlayerTabCorner.CornerRadius = UDim.new(0, 12)
+    PlayerTabCorner.Parent = PlayerTab
+
+    VisualTab = Instance.new("Frame")
+    VisualTab.Size = UDim2.new(0, 400, 0, 360)
+    VisualTab.Position = UDim2.new(0, 0, 0, 40)
+    VisualTab.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    VisualTab.Visible = false
+    VisualTab.Parent = MainFrame
+    VisualTab.BackgroundTransparency = 0.1
+
+    -- VisualTab için UICorner ekle
+    local VisualTabCorner = Instance.new("UICorner")
+    VisualTabCorner.CornerRadius = UDim.new(0, 12)
+    VisualTabCorner.Parent = VisualTab
+
+    -- Tab Button Functionality
+    local function ToggleTabButton(button, isActive)
+        local targetColor = isActive and Color3.fromRGB(80, 0, 80) or Color3.fromRGB(50, 50, 50)
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(button, tweenInfo, {BackgroundColor3 = targetColor})
+        tween:Play()
+    end
+
+    AimbotTabButton.MouseButton1Click:Connect(function()
+        AimbotTab.Visible = true
+        PlayerTab.Visible = false
+        VisualTab.Visible = false
+        ToggleTabButton(AimbotTabButton, true)
+        ToggleTabButton(PlayerTabButton, false)
+        ToggleTabButton(VisualTabButton, false)
+    end)
+
+    PlayerTabButton.MouseButton1Click:Connect(function()
+        AimbotTab.Visible = false
+        PlayerTab.Visible = true
+        VisualTab.Visible = false
+        ToggleTabButton(AimbotTabButton, false)
+        ToggleTabButton(PlayerTabButton, true)
+        ToggleTabButton(VisualTabButton, false)
+    end)
+
+    VisualTabButton.MouseButton1Click:Connect(function()
+        AimbotTab.Visible = false
+        PlayerTab.Visible = false
+        VisualTab.Visible = true
+        ToggleTabButton(AimbotTabButton, false)
+        ToggleTabButton(PlayerTabButton, false)
+        ToggleTabButton(VisualTabButton, true)
+    end)
+
+    -- Aimbot Tab Content
+    local CamlockCheckBox = Instance.new("TextButton")
+    CamlockCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    CamlockCheckBox.Position = UDim2.new(0, 10, 0, 10)
+    CamlockCheckBox.BackgroundColor3 = SavedSettings.CamLockEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    CamlockCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CamlockCheckBox.Text = ""
+    CamlockCheckBox.TextSize = 24
+    CamlockCheckBox.Font = Enum.Font.SourceSansBold
+    CamlockCheckBox.AutoButtonColor = false
+    CamlockCheckBox.Parent = AimbotTab
+
+    -- CamlockCheckBox için UICorner ekle
+    local CamlockCheckBoxCorner = Instance.new("UICorner")
+    CamlockCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    CamlockCheckBoxCorner.Parent = CamlockCheckBox
+
+    local CamlockLabel = Instance.new("TextLabel")
+    CamlockLabel.Size = UDim2.new(0, 100, 0, 30)
+    CamlockLabel.Position = UDim2.new(0, 50, 0, 10)
+    CamlockLabel.BackgroundTransparency = 1
+    CamlockLabel.Text = "Camlock"
+    CamlockLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CamlockLabel.TextSize = 18
+    CamlockLabel.Font = Enum.Font.SourceSansBold
+    CamlockLabel.Parent = AimbotTab
+
+    -- Camlock Keybind Button
+    local CamlockKeybindButton = Instance.new("TextButton")
+    CamlockKeybindButton.Size = UDim2.new(0, 150, 0, 30)
+    CamlockKeybindButton.Position = UDim2.new(0, 10, 0, 50)
+    CamlockKeybindButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    CamlockKeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CamlockKeybindButton.Text = "Camlock Key: " .. SavedSettings.CamlockKey
+    CamlockKeybindButton.TextSize = 18
+    CamlockKeybindButton.Font = Enum.Font.SourceSansBold
+    CamlockKeybindButton.Parent = AimbotTab
+
+    -- CamlockKeybindButton için UICorner ekle
+    local CamlockKeybindButtonCorner = Instance.new("UICorner")
+    CamlockKeybindButtonCorner.CornerRadius = UDim.new(0, 8)
+    CamlockKeybindButtonCorner.Parent = CamlockKeybindButton
+
+    -- Camlock Distance TextBox
+    local DistanceTextBox = Instance.new("TextBox")
+    DistanceTextBox.Size = UDim2.new(0, 150, 0, 30)
+    DistanceTextBox.Position = UDim2.new(0, 10, 0, 90)
+    DistanceTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    DistanceTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DistanceTextBox.Text = tostring(SavedSettings.MaxLockDistance)
+    DistanceTextBox.TextSize = 18
+    DistanceTextBox.Font = Enum.Font.SourceSansBold
+    DistanceTextBox.PlaceholderText = "Max Distance (50-500)"
+    DistanceTextBox.Parent = AimbotTab
+
+    -- DistanceTextBox için UICorner ekle
+    local DistanceTextBoxCorner = Instance.new("UICorner")
+    DistanceTextBoxCorner.CornerRadius = UDim.new(0, 8)
+    DistanceTextBoxCorner.Parent = DistanceTextBox
+
+    -- Prediction TextBox
+    local PredictionTextBox = Instance.new("TextBox")
+    PredictionTextBox.Size = UDim2.new(0, 150, 0, 30)
+    PredictionTextBox.Position = UDim2.new(0, 10, 0, 130)
+    PredictionTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    PredictionTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PredictionTextBox.Text = tostring(SavedSettings.PredictionValue)
+    PredictionTextBox.TextSize = 18
+    PredictionTextBox.Font = Enum.Font.SourceSansBold
+    PredictionTextBox.PlaceholderText = "Prediction (0.1-1.0)"
+    PredictionTextBox.Parent = AimbotTab
+
+    -- PredictionTextBox için UICorner ekle
+    local PredictionTextBoxCorner = Instance.new("UICorner")
+    PredictionTextBoxCorner.CornerRadius = UDim.new(0, 8)
+    PredictionTextBoxCorner.Parent = PredictionTextBox
+
+    -- Update Prediction Value
+    PredictionTextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local newPrediction = tonumber(PredictionTextBox.Text)
+            if newPrediction and newPrediction >= 0.1 and newPrediction <= 1.0 then
+                predictionValue = newPrediction
+                SavedSettings.PredictionValue = predictionValue
+            else
+                PredictionTextBox.Text = tostring(predictionValue)  -- Geçersiz değer girilirse eski değeri geri yükle
+            end
+        end
+    end)
+
+    -- Player Tab Content
+    local SpeedCheckBox = Instance.new("TextButton")
+    SpeedCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    SpeedCheckBox.Position = UDim2.new(0, 10, 0, 10)
+    SpeedCheckBox.BackgroundColor3 = SavedSettings.SpeedEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    SpeedCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedCheckBox.Text = ""
+    SpeedCheckBox.TextSize = 24
+    SpeedCheckBox.Font = Enum.Font.SourceSansBold
+    SpeedCheckBox.AutoButtonColor = false
+    SpeedCheckBox.Parent = PlayerTab
+
+    -- SpeedCheckBox için UICorner ekle
+    local SpeedCheckBoxCorner = Instance.new("UICorner")
+    SpeedCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    SpeedCheckBoxCorner.Parent = SpeedCheckBox
+
+    local SpeedLabel = Instance.new("TextLabel")
+    SpeedLabel.Size = UDim2.new(0, 100, 0, 30)
+    SpeedLabel.Position = UDim2.new(0, 50, 0, 10)
+    SpeedLabel.BackgroundTransparency = 1
+    SpeedLabel.Text = "Speed"
+    SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedLabel.TextSize = 18
+    SpeedLabel.Font = Enum.Font.SourceSansBold
+    SpeedLabel.Parent = PlayerTab
+
+    -- Speed Keybind Button
+    local SpeedKeybindButton = Instance.new("TextButton")
+    SpeedKeybindButton.Size = UDim2.new(0, 150, 0, 30)
+    SpeedKeybindButton.Position = UDim2.new(0, 10, 0, 50)
+    SpeedKeybindButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    SpeedKeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedKeybindButton.Text = "Speed Key: " .. SavedSettings.SpeedKey
+    SpeedKeybindButton.TextSize = 18
+    SpeedKeybindButton.Font = Enum.Font.SourceSansBold
+    SpeedKeybindButton.Parent = PlayerTab
+
+    -- SpeedKeybindButton için UICorner ekle
+    local SpeedKeybindButtonCorner = Instance.new("UICorner")
+    SpeedKeybindButtonCorner.CornerRadius = UDim.new(0, 8)
+    SpeedKeybindButtonCorner.Parent = SpeedKeybindButton
+
+    -- Speed Value TextBox
+    local SpeedTextBox = Instance.new("TextBox")
+    SpeedTextBox.Size = UDim2.new(0, 150, 0, 30)
+    SpeedTextBox.Position = UDim2.new(0, 10, 0, 90)
+    SpeedTextBox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    SpeedTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SpeedTextBox.Text = tostring(SavedSettings.SpeedValue)
+    SpeedTextBox.TextSize = 18
+    SpeedTextBox.Font = Enum.Font.SourceSansBold
+    SpeedTextBox.PlaceholderText = "Speed (16-1000)"
+    SpeedTextBox.Parent = PlayerTab
+
+    -- SpeedTextBox için UICorner ekle
+    local SpeedTextBoxCorner = Instance.new("UICorner")
+    SpeedTextBoxCorner.CornerRadius = UDim.new(0, 8)
+    SpeedTextBoxCorner.Parent = SpeedTextBox
+
+    -- Visual Tab Content
+    local ESPCheckBox = Instance.new("TextButton")
+    ESPCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    ESPCheckBox.Position = UDim2.new(0, 10, 0, 10)
+    ESPCheckBox.BackgroundColor3 = SavedSettings.ESPEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    ESPCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ESPCheckBox.Text = ""
+    ESPCheckBox.TextSize = 24
+    ESPCheckBox.Font = Enum.Font.SourceSansBold
+    ESPCheckBox.AutoButtonColor = false
+    ESPCheckBox.Parent = VisualTab
+
+    -- ESPCheckBox için UICorner ekle
+    local ESPCheckBoxCorner = Instance.new("UICorner")
+    ESPCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    ESPCheckBoxCorner.Parent = ESPCheckBox
+
+    local ESPLabel = Instance.new("TextLabel")
+    ESPLabel.Size = UDim2.new(0, 100, 0, 30)
+    ESPLabel.Position = UDim2.new(0, 50, 0, 10)
+    ESPLabel.BackgroundTransparency = 1
+    ESPLabel.Text = "ESP"
+    ESPLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ESPLabel.TextSize = 18
+    ESPLabel.Font = Enum.Font.SourceSansBold
+    ESPLabel.Parent = VisualTab
+
+    -- ESP Keybind Button
+    local ESPKeybindButton = Instance.new("TextButton")
+    ESPKeybindButton.Size = UDim2.new(0, 150, 0, 30)
+    ESPKeybindButton.Position = UDim2.new(0, 10, 0, 50)
+    ESPKeybindButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    ESPKeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ESPKeybindButton.Text = "ESP Key: " .. SavedSettings.ESPKey
+    ESPKeybindButton.TextSize = 18
+    ESPKeybindButton.Font = Enum.Font.SourceSansBold
+    ESPKeybindButton.Parent = VisualTab
+
+    -- ESPKeybindButton için UICorner ekle
+    local ESPKeybindButtonCorner = Instance.new("UICorner")
+    ESPKeybindButtonCorner.CornerRadius = UDim.new(0, 8)
+    ESPKeybindButtonCorner.Parent = ESPKeybindButton
+
+    -- Skeleton ESP CheckBox
+    local SkeletonESPCheckBox = Instance.new("TextButton")
+    SkeletonESPCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    SkeletonESPCheckBox.Position = UDim2.new(0, 10, 0, 90)
+    SkeletonESPCheckBox.BackgroundColor3 = SavedSettings.SkeletonESPEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    SkeletonESPCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SkeletonESPCheckBox.Text = ""
+    SkeletonESPCheckBox.TextSize = 24
+    SkeletonESPCheckBox.Font = Enum.Font.SourceSansBold
+    SkeletonESPCheckBox.AutoButtonColor = false
+    SkeletonESPCheckBox.Parent = VisualTab
+
+    -- SkeletonESPCheckBox için UICorner ekle
+    local SkeletonESPCheckBoxCorner = Instance.new("UICorner")
+    SkeletonESPCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    SkeletonESPCheckBoxCorner.Parent = SkeletonESPCheckBox
+
+    local SkeletonESPLabel = Instance.new("TextLabel")
+    SkeletonESPLabel.Size = UDim2.new(0, 100, 0, 30)
+    SkeletonESPLabel.Position = UDim2.new(0, 50, 0, 90)
+    SkeletonESPLabel.BackgroundTransparency = 1
+    SkeletonESPLabel.Text = "Skeleton ESP"
+    SkeletonESPLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SkeletonESPLabel.TextSize = 18
+    SkeletonESPLabel.Font = Enum.Font.SourceSansBold
+    SkeletonESPLabel.Parent = VisualTab
+
+    -- Health Bar CheckBox
+    local HealthBarCheckBox = Instance.new("TextButton")
+    HealthBarCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    HealthBarCheckBox.Position = UDim2.new(0, 10, 0, 130)
+    HealthBarCheckBox.BackgroundColor3 = SavedSettings.HealthBarEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    HealthBarCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    HealthBarCheckBox.Text = ""
+    HealthBarCheckBox.TextSize = 24
+    HealthBarCheckBox.Font = Enum.Font.SourceSansBold
+    HealthBarCheckBox.AutoButtonColor = false
+    HealthBarCheckBox.Parent = VisualTab
+
+    -- HealthBarCheckBox için UICorner ekle
+    local HealthBarCheckBoxCorner = Instance.new("UICorner")
+    HealthBarCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    HealthBarCheckBoxCorner.Parent = HealthBarCheckBox
+
+    local HealthBarLabel = Instance.new("TextLabel")
+    HealthBarLabel.Size = UDim2.new(0, 100, 0, 30)
+    HealthBarLabel.Position = UDim2.new(0, 50, 0, 130)
+    HealthBarLabel.BackgroundTransparency = 1
+    HealthBarLabel.Text = "Health Bar"
+    HealthBarLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    HealthBarLabel.TextSize = 18
+    HealthBarLabel.Font = Enum.Font.SourceSansBold
+    HealthBarLabel.Parent = VisualTab
+
+    -- Toggle Checkmark Function
+    local function ToggleCheckmark(button, isChecked)
+        local targetColor = isChecked and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(button, tweenInfo, {BackgroundColor3 = targetColor})
+        tween:Play()
+    end
+
+    -- ESP CheckBox Functionality
+    ESPCheckBox.MouseButton1Click:Connect(function()
+        isESPEnabled = not isESPEnabled
+        SavedSettings.ESPEnabled = isESPEnabled
+        ToggleCheckmark(ESPCheckBox, isESPEnabled)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                coroutine.wrap(ESP)(player)
+            end
+        end
+    end)
+
+    -- Skeleton ESP CheckBox Functionality
+    SkeletonESPCheckBox.MouseButton1Click:Connect(function()
+        isSkeletonESPEnabled = not isSkeletonESPEnabled
+        SavedSettings.SkeletonESPEnabled = isSkeletonESPEnabled
+        ToggleCheckmark(SkeletonESPCheckBox, isSkeletonESPEnabled)
+    end)
+
+    -- Health Bar CheckBox Functionality
+    HealthBarCheckBox.MouseButton1Click:Connect(function()
+        isHealthBarEnabled = not isHealthBarEnabled
+        SavedSettings.HealthBarEnabled = isHealthBarEnabled
+        ToggleCheckmark(HealthBarCheckBox, isHealthBarEnabled)
+    end)
+
+    -- Camlock CheckBox Functionality
+    CamlockCheckBox.MouseButton1Click:Connect(function()
+        isCamLockEnabled = not isCamLockEnabled
+        SavedSettings.CamLockEnabled = isCamLockEnabled
+        ToggleCheckmark(CamlockCheckBox, isCamLockEnabled)
+    end)
+
+    -- Speed CheckBox Functionality
+    SpeedCheckBox.MouseButton1Click:Connect(function()
+        isSpeedEnabled = not isSpeedEnabled
+        SavedSettings.SpeedEnabled = isSpeedEnabled
+        ToggleCheckmark(SpeedCheckBox, isSpeedEnabled)
+    end)
+
+    -- Update Max Distance
+    DistanceTextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local newDistance = tonumber(DistanceTextBox.Text)
+            if newDistance and newDistance >= 50 and newDistance <= 500 then
+                maxLockDistance = newDistance
+                SavedSettings.MaxLockDistance = maxLockDistance
+            else
+                DistanceTextBox.Text = tostring(maxLockDistance)  -- Restore old value if invalid
+            end
+        end
+    end)
+
+    -- Update Speed Value
+    SpeedTextBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local newSpeed = tonumber(SpeedTextBox.Text)
+            if newSpeed and newSpeed >= 16 and newSpeed <= 1000 then
+                speedValue = newSpeed
+                SavedSettings.SpeedValue = speedValue
+            else
+                SpeedTextBox.Text = tostring(speedValue)  -- Restore old value if invalid
+            end
+        end
+    end)
+
+    -- Keybind Assignment Functionality
+    local function AssignKeybind(button, keybindType)
+        button.Text = "Press any key..."
+        local inputConnection
+        inputConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if not gameProcessed then
+                local key = input.KeyCode.Name
+                if keybindType == "Camlock" then
+                    camlockKey = input.KeyCode
+                    SavedSettings.CamlockKey = key
+                    button.Text = "Camlock Key: " .. key
+                elseif keybindType == "Speed" then
+                    speedKey = input.KeyCode
+                    SavedSettings.SpeedKey = key
+                    button.Text = "Speed Key: " .. key
+                elseif keybindType == "ESP" then
+                    espKey = input.KeyCode
+                    SavedSettings.ESPKey = key
+                    button.Text = "ESP Key: " .. key
+                end
+                inputConnection:Disconnect()
+            end
+        end)
+    end
+
+    -- Camlock Keybind Button Functionality
+    CamlockKeybindButton.MouseButton1Click:Connect(function()
+        AssignKeybind(CamlockKeybindButton, "Camlock")
+    end)
+
+    -- Speed Keybind Button Functionality
+    SpeedKeybindButton.MouseButton1Click:Connect(function()
+        AssignKeybind(SpeedKeybindButton, "Speed")
+    end)
+
+    -- ESP Keybind Button Functionality
+    ESPKeybindButton.MouseButton1Click:Connect(function()
+        AssignKeybind(ESPKeybindButton, "ESP")
+    end)
+
+    -- GUI'yi tutma ve kaydırma fonksiyonları
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    local function UpdateInput(input)
+        local delta = input.Position - dragStart
+        local newPosition = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        
+        -- Smooth hareket için TweenService kullan
+        local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tween = TweenService:Create(MainFrame, tweenInfo, {Position = newPosition})
+        tween:Play()
+    end
+
+    MainFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    MainFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            UpdateInput(input)
+        end
+    end)
+end
+
+-- Toggle GUI with Home Key
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Insert then
+        SavedSettings.GUIVisible = not SavedSettings.GUIVisible
+        MainFrame.Visible = SavedSettings.GUIVisible
+    end
+end)
+
+-- Recreate GUI on Respawn
+LocalPlayer.CharacterAdded:Connect(function()
+    wait(1)  -- Wait for character to fully load
+    if ScreenGui then
+        ScreenGui:Destroy()  -- Destroy old GUI
+    end
+    CreateGUI()  -- Recreate GUI with saved settings
+end)
+
+-- Initial GUI Creation
+CreateGUI()
+
+-- ESP Function
+local function ESP(plr)
+    local library = {
+        name = Drawing.new("Text"),  -- İsim için
+        healthbar = Drawing.new("Line"),  -- Health bar için
+        greenhealth = Drawing.new("Line")  -- Health bar doluluk çubuğu için
+    }
+
+    -- Initialize ESP elements
+    library.name.Visible = isESPEnabled  -- İsim görünürlüğü
+    library.name.Color = Settings.Box_Color  -- İsim rengi
+    library.name.Size = 18  -- İsim boyutu
+    library.name.Center = true  -- Metni merkezle
+    library.name.Outline = true  -- İsime dış çizgi ekle
+    library.name.OutlineColor = Color3.new(0, 0, 0)  -- Dış çizgi rengi (siyah)
+    library.name.Text = plr.Name  -- Oyuncunun ismi
+
+    library.healthbar.Visible = isESPEnabled and isHealthBarEnabled  -- Health bar görünürlüğü
+    library.healthbar.Color = Color3.fromRGB(255, 0, 0)  -- Health bar rengi (kırmızı)
+    library.healthbar.Thickness = 2  -- Health bar kalınlığı
+
+    library.greenhealth.Visible = isESPEnabled and isHealthBarEnabled  -- Health bar doluluk çubuğu görünürlüğü
+    library.greenhealth.Color = Color3.fromRGB(0, 255, 0)  -- Doluluk rengi (yeşil)
+    library.greenhealth.Thickness = 2  -- Doluluk çubuğu kalınlığı
+
+    -- Update ESP
+    local function Updater()
+        local connection
+        connection = RunService.RenderStepped:Connect(function()
+            if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = plr.Character.HumanoidRootPart
+                local rootPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+
+                if onScreen then
+                    -- İsim pozisyonunu güncelle
+                    library.name.Position = Vector2.new(rootPos.X, rootPos.Y - 30)  -- İsim, karakterin üstünde gözükecek
+                    library.name.Visible = isESPEnabled  -- isESPEnabled'e göre görünürlük ayarla
+
+                    -- Health bar pozisyonunu güncelle
+                    if isHealthBarEnabled then
+                        local health = plr.Character.Humanoid.Health
+                        local maxHealth = plr.Character.Humanoid.MaxHealth
+                        local healthPercentage = health / maxHealth
+                        local barLength = 50  -- Health bar uzunluğu
+                        local barOffset = Vector2.new(rootPos.X - barLength / 2, rootPos.Y + 20)  -- Health bar pozisyonu
+
+                        -- Health bar (kırmızı arka plan)
+                        library.healthbar.From = barOffset
+                        library.healthbar.To = Vector2.new(barOffset.X + barLength, barOffset.Y)
+                        library.healthbar.Visible = isESPEnabled
+
+                        -- Health bar doluluk çubuğu (yeşil)
+                        library.greenhealth.From = barOffset
+                        library.greenhealth.To = Vector2.new(barOffset.X + barLength * healthPercentage, barOffset.Y)
+                        library.greenhealth.Visible = isESPEnabled
+                    else
+                        library.healthbar.Visible = false
+                        library.greenhealth.Visible = false
+                    end
+                else
+                    -- Ekranda değilse gizle
+                    library.name.Visible = false
+                    library.healthbar.Visible = false
+                    library.greenhealth.Visible = false
+                end
+            else
+                -- Karakter yoksa gizle
+                library.name.Visible = false
+                library.healthbar.Visible = false
+                library.greenhealth.Visible = false
+                if not Players:FindFirstChild(plr.Name) then
+                    connection:Disconnect()  -- Oyuncu oyundan ayrıldıysa bağlantıyı kes
+                end
+            end
+        end)
+    end
+    coroutine.wrap(Updater)()
+end
+
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        coroutine.wrap(ESP)(player)
+    end
+end
+
+-- Set Up ESP for New Players
+Players.PlayerAdded:Connect(function(newPlayer)
+    if newPlayer ~= LocalPlayer then
+        coroutine.wrap(ESP)(newPlayer)
+    end
+end)
+
+-- Skeleton ESP Functionality
+local function DrawSkeleton(character)
+    local boneConnections = {
+        {"Head", "UpperTorso"},
+        {"UpperTorso", "LowerTorso"},
+        {"LowerTorso", "LeftUpperLeg"},
+        {"LowerTorso", "RightUpperLeg"},
+        {"LeftUpperLeg", "LeftLowerLeg"},
+        {"RightUpperLeg", "RightLowerLeg"},
+        {"LeftLowerLeg", "LeftFoot"},
+        {"RightLowerLeg", "RightFoot"},
+        {"UpperTorso", "LeftUpperArm"},
+        {"UpperTorso", "RightUpperArm"},
+        {"LeftUpperArm", "LeftLowerArm"},
+        {"RightUpperArm", "RightLowerArm"},
+        {"LeftLowerArm", "LeftHand"},
+        {"RightLowerArm", "RightHand"}
+    }
+
+    local lines = {}
+    for _, bone in pairs(boneConnections) do
+        local part1 = character:FindFirstChild(bone[1])
+        local part2 = character:FindFirstChild(bone[2])
+        if part1 and part2 then
+            local line = Drawing.new("Line")
+            line.Visible = isSkeletonESPEnabled
+            line.Color = Color3.fromRGB(255, 0, 0)  -- Kemik rengi (kırmızı)
+            line.Thickness = 2  -- Kemik kalınlığı
+            table.insert(lines, {line = line, part1 = part1, part2 = part2})
+        end
+    end
+
+    local function UpdateSkeleton()
+        for _, data in pairs(lines) do
+            local part1 = data.part1
+            local part2 = data.part2
+            local line = data.line
+
+            if part1 and part2 then
+                local screenPoint1, onScreen1 = Camera:WorldToViewportPoint(part1.Position)
+                local screenPoint2, onScreen2 = Camera:WorldToViewportPoint(part2.Position)
+                if onScreen1 and onScreen2 then
+                    line.From = Vector2.new(screenPoint1.X, screenPoint1.Y)
+                    line.To = Vector2.new(screenPoint2.X, screenPoint2.Y)
+                    line.Visible = isSkeletonESPEnabled
+                else
+                    line.Visible = false
+                end
+            else
+                line.Visible = false
+            end
+        end
+    end
+
+    RunService.RenderStepped:Connect(UpdateSkeleton)
+end
+
+-- Apply Skeleton ESP to all players
+for _, player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer and player.Character then
+        DrawSkeleton(player.Character)
+    end
+end
+
+-- Apply Skeleton ESP to new players
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function(character)
+            DrawSkeleton(character)
+        end)
+    end
+end)
+
+-- Camlock Functionality with Prediction
+local function GetClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+    local mouse = LocalPlayer:GetMouse()
+    local mousePosition = Vector2.new(mouse.X, mouse.Y)
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild(lockBodyPart) then
+            local character = player.Character
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude
+            
+            if distance <= maxLockDistance then
+                local screenPoint, onScreen = Camera:WorldToViewportPoint(character[lockBodyPart].Position)
+                if onScreen then
+                    local screenPosition = Vector2.new(screenPoint.X, screenPoint.Y)
+                    local mouseDistance = (mousePosition - screenPosition).Magnitude
+                    
+                    if mouseDistance < shortestDistance then
+                        shortestDistance = mouseDistance
+                        closestPlayer = player
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- Toggle Camlock on Key Press
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == camlockKey and isCamLockEnabled then
+        if lockedTarget then
+            highlight.Parent = nil
+            lockedTarget = nil
+        else
+            lockedTarget = GetClosestPlayer()
+            if lockedTarget and lockedTarget.Character then
+                highlight.Parent = lockedTarget.Character
+            end
+        end
+    end
+end)
+
+-- Update Camlock with Prediction
+RunService.RenderStepped:Connect(function()
+    if isCamLockEnabled and lockedTarget and lockedTarget.Character and lockedTarget.Character:FindFirstChild(lockBodyPart) then
+        local humanoid = lockedTarget.Character:FindFirstChild("Humanoid")
+        if humanoid and humanoid.Health > 0 then
+            local targetPosition = lockedTarget.Character[lockBodyPart].Position
+            
+            -- Prediction hesaplaması
+            local targetVelocity = lockedTarget.Character[lockBodyPart].Velocity
+            local predictedPosition = targetPosition + (targetVelocity * predictionValue)
+            
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, predictedPosition)
+        else
+            highlight.Parent = nil
+            lockedTarget = nil
+        end
+    end
+end)
+
+-- Speed Functionality
+local function ApplySpeed()
+    if isSpeedEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        if isSpeedActive then
+            LocalPlayer.Character.Humanoid.WalkSpeed = speedValue
+        else
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16  -- Default speed
+        end
+    end
+end
+
+-- Toggle Speed on Key Press
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == speedKey and isSpeedEnabled then
+        isSpeedActive = not isSpeedActive
+        ApplySpeed()
+    end
+end)
+
+-- Update Speed
+RunService.RenderStepped:Connect(function()
+    if isSpeedEnabled then
+        ApplySpeed()
+    end
+end)
+
+-- Toggle ESP on Key Press
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == espKey then
+        isESPEnabled = not isESPEnabled
+        SavedSettings.ESPEnabled = isESPEnabled
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                coroutine.wrap(ESP)(player)
+            end
+        end
+    end
+end)
