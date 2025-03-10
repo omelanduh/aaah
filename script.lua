@@ -20,6 +20,9 @@ local speedValue = 16  -- Default speed value
 local isHealthBarEnabled = false  -- Health Bar toggle status
 local predictionValue = 0.1  -- Prediction value for camlock
 
+-- ESP için Drawing objelerini saklamak için tablo
+local ESPTable = {}
+
 -- Keybinds
 local camlockKey = Enum.KeyCode.T  -- Default camlock key
 local speedKey = Enum.KeyCode.C  -- Default speed key
@@ -479,12 +482,19 @@ local function CreateGUI()
         ToggleCheckmark(SkeletonESPCheckBox, isSkeletonESPEnabled)
     end)
 
-    -- Health Bar CheckBox Functionality
-    HealthBarCheckBox.MouseButton1Click:Connect(function()
-        isHealthBarEnabled = not isHealthBarEnabled
-        SavedSettings.HealthBarEnabled = isHealthBarEnabled
-        ToggleCheckmark(HealthBarCheckBox, isHealthBarEnabled)
-    end)
+	-- Health Bar CheckBox Functionality
+	HealthBarCheckBox.MouseButton1Click:Connect(function()
+    	isHealthBarEnabled = not isHealthBarEnabled
+    	SavedSettings.HealthBarEnabled = isHealthBarEnabled
+    	ToggleCheckmark(HealthBarCheckBox, isHealthBarEnabled)
+
+    	-- Tüm ESP'leri yeniden çiz
+    	for _, player in pairs(Players:GetPlayers()) do
+        	if player ~= LocalPlayer then
+            	coroutine.wrap(ESP)(player)
+        	end
+    	end
+	end)
 
     -- Camlock CheckBox Functionality
     CamlockCheckBox.MouseButton1Click:Connect(function()
@@ -628,84 +638,99 @@ end)
 -- Initial GUI Creation
 CreateGUI()
 
--- ESP Function
+
 local function ESP(plr)
+    if ESPTable[plr] then
+        return
+    end
+
     local library = {
-        name = Drawing.new("Text"),  -- İsim için
-        healthbar = Drawing.new("Line"),  -- Health bar için
-        greenhealth = Drawing.new("Line")  -- Health bar doluluk çubuğu için
+        name = Drawing.new("Text"),
+        healthbar = Drawing.new("Line"),
+        greenhealth = Drawing.new("Line")
     }
 
-    -- Initialize ESP elements
-    library.name.Visible = isESPEnabled  -- İsim görünürlüğü
-    library.name.Color = Settings.Box_Color  -- İsim rengi
-    library.name.Size = 18  -- İsim boyutu
-    library.name.Center = true  -- Metni merkezle
-    library.name.Outline = true  -- İsime dış çizgi ekle
-    library.name.OutlineColor = Color3.new(0, 0, 0)  -- Dış çizgi rengi (siyah)
-    library.name.Text = plr.Name  -- Oyuncunun ismi
+    ESPTable[plr] = library
 
-    library.healthbar.Visible = isESPEnabled and isHealthBarEnabled  -- Health bar görünürlüğü
-    library.healthbar.Color = Color3.fromRGB(255, 0, 0)  -- Health bar rengi (kırmızı)
-    library.healthbar.Thickness = 2  -- Health bar kalınlığı
+    -- ESP ismi sadece ESP checkbox işaretliyse gösterilsin
+    library.name.Visible = isESPEnabled and SavedSettings.ESPEnabled
+    library.name.Color = Settings.Box_Color
+    library.name.Size = 18
+    library.name.Center = true
+    library.name.Outline = true
+    library.name.OutlineColor = Color3.new(0, 0, 0)
+    library.name.Text = plr.Name
 
-    library.greenhealth.Visible = isESPEnabled and isHealthBarEnabled  -- Health bar doluluk çubuğu görünürlüğü
-    library.greenhealth.Color = Color3.fromRGB(0, 255, 0)  -- Doluluk rengi (yeşil)
-    library.greenhealth.Thickness = 2  -- Doluluk çubuğu kalınlığı
+    -- Health Bar sadece Health Bar checkbox işaretliyse gösterilsin
+    library.healthbar.Visible = isHealthBarEnabled and SavedSettings.HealthBarEnabled
+    library.healthbar.Color = Color3.fromRGB(255, 0, 0)
+    library.healthbar.Thickness = 2
 
-    -- Update ESP
+    library.greenhealth.Visible = isHealthBarEnabled and SavedSettings.HealthBarEnabled
+    library.greenhealth.Color = Color3.fromRGB(0, 255, 0)
+    library.greenhealth.Thickness = 2
+
     local function Updater()
         local connection
         connection = RunService.RenderStepped:Connect(function()
             if plr.Character and plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("HumanoidRootPart") then
                 local rootPart = plr.Character.HumanoidRootPart
-                local rootPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
+                local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
 
-                if onScreen then
-                    -- İsim pozisyonunu güncelle
-                    library.name.Position = Vector2.new(rootPos.X, rootPos.Y - 30)  -- İsim, karakterin üstünde gözükecek
-                    library.name.Visible = isESPEnabled  -- isESPEnabled'e göre görünürlük ayarla
+                -- Sadece 500 metre içindeki oyuncular için ESP çiz
+                if distance <= 500 then
+                    local rootPos, onScreen = Camera:WorldToViewportPoint(rootPart.Position)
 
-                    -- Health bar pozisyonunu güncelle
-                    if isHealthBarEnabled then
-                        local health = plr.Character.Humanoid.Health
-                        local maxHealth = plr.Character.Humanoid.MaxHealth
-                        local healthPercentage = health / maxHealth
-                        local barLength = 50  -- Health bar uzunluğu
-                        local barOffset = Vector2.new(rootPos.X - barLength / 2, rootPos.Y + 20)  -- Health bar pozisyonu
+                    if onScreen then
+                        -- ESP ismi sadece ESP checkbox işaretliyse gösterilsin
+                        library.name.Position = Vector2.new(rootPos.X, rootPos.Y - 30)
+                        library.name.Visible = isESPEnabled and SavedSettings.ESPEnabled
 
-                        -- Health bar (kırmızı arka plan)
-                        library.healthbar.From = barOffset
-                        library.healthbar.To = Vector2.new(barOffset.X + barLength, barOffset.Y)
-                        library.healthbar.Visible = isESPEnabled
+                        -- Health Bar sadece Health Bar checkbox işaretliyse gösterilsin
+                        if isHealthBarEnabled and SavedSettings.HealthBarEnabled then
+                            local health = plr.Character.Humanoid.Health
+                            local maxHealth = plr.Character.Humanoid.MaxHealth
+                            local healthPercentage = health / maxHealth
+                            local barHeight = 50
+                            local barWidth = 4
+                            local barOffset = Vector2.new(rootPos.X - 30, rootPos.Y - barHeight / 2)
 
-                        -- Health bar doluluk çubuğu (yeşil)
-                        library.greenhealth.From = barOffset
-                        library.greenhealth.To = Vector2.new(barOffset.X + barLength * healthPercentage, barOffset.Y)
-                        library.greenhealth.Visible = isESPEnabled
+                            -- Kırmızı arka plan
+                            library.healthbar.From = barOffset
+                            library.healthbar.To = Vector2.new(barOffset.X, barOffset.Y + barHeight)
+                            library.healthbar.Visible = true
+
+                            -- Yeşil sağlık çubuğu
+                            library.greenhealth.From = barOffset
+                            library.greenhealth.To = Vector2.new(barOffset.X, barOffset.Y + barHeight * healthPercentage)
+                            library.greenhealth.Visible = true
+                        else
+                            library.healthbar.Visible = false
+                            library.greenhealth.Visible = false
+                        end
                     else
+                        library.name.Visible = false
                         library.healthbar.Visible = false
                         library.greenhealth.Visible = false
                     end
                 else
-                    -- Ekranda değilse gizle
                     library.name.Visible = false
                     library.healthbar.Visible = false
                     library.greenhealth.Visible = false
                 end
             else
-                -- Karakter yoksa gizle
                 library.name.Visible = false
                 library.healthbar.Visible = false
                 library.greenhealth.Visible = false
                 if not Players:FindFirstChild(plr.Name) then
-                    connection:Disconnect()  -- Oyuncu oyundan ayrıldıysa bağlantıyı kes
+                    connection:Disconnect()
                 end
             end
         end)
     end
     coroutine.wrap(Updater)()
 end
+
 
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
@@ -720,6 +745,24 @@ Players.PlayerAdded:Connect(function(newPlayer)
     end
 end)
 
+-- ESP'yi kapatma fonksiyonu
+local function ClearESP(plr)
+    if ESPTable[plr] then
+        for _, drawing in pairs(ESPTable[plr]) do
+            drawing:Remove()  -- Drawing objelerini temizle
+        end
+        ESPTable[plr] = nil  -- Tablodan kaldır
+    end
+end
+
+-- Tüm ESP'leri temizleme fonksiyonu
+local function ClearAllESP()
+    for plr, _ in pairs(ESPTable) do
+        ClearESP(plr)
+    end
+end
+
+-- Skeleton ESP Functionality
 -- Skeleton ESP Functionality
 local function DrawSkeleton(character)
     local boneConnections = {
@@ -745,36 +788,52 @@ local function DrawSkeleton(character)
         local part2 = character:FindFirstChild(bone[2])
         if part1 and part2 then
             local line = Drawing.new("Line")
-            line.Visible = isSkeletonESPEnabled
-            line.Color = Color3.fromRGB(255, 0, 0)  -- Kemik rengi (kırmızı)
-            line.Thickness = 2  -- Kemik kalınlığı
+            line.Visible = isSkeletonESPEnabled and SavedSettings.SkeletonESPEnabled
+            line.Color = Color3.fromRGB(255, 0, 0)
+            line.Thickness = 2
             table.insert(lines, {line = line, part1 = part1, part2 = part2})
         end
     end
 
     local function UpdateSkeleton()
-        for _, data in pairs(lines) do
-            local part1 = data.part1
-            local part2 = data.part2
-            local line = data.line
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if isSkeletonESPEnabled and SavedSettings.SkeletonESPEnabled then
+                for _, data in pairs(lines) do
+                    local part1 = data.part1
+                    local part2 = data.part2
+                    local line = data.line
 
-            if part1 and part2 then
-                local screenPoint1, onScreen1 = Camera:WorldToViewportPoint(part1.Position)
-                local screenPoint2, onScreen2 = Camera:WorldToViewportPoint(part2.Position)
-                if onScreen1 and onScreen2 then
-                    line.From = Vector2.new(screenPoint1.X, screenPoint1.Y)
-                    line.To = Vector2.new(screenPoint2.X, screenPoint2.Y)
-                    line.Visible = isSkeletonESPEnabled
-                else
-                    line.Visible = false
+                    if part1 and part2 and part1.Parent and part2.Parent then
+                        local distance = (LocalPlayer.Character.HumanoidRootPart.Position - part1.Position).Magnitude
+
+                        -- Sadece 500 metre içindeki oyuncular için Skeleton ESP çiz
+                        if distance <= 500 then
+                            local screenPoint1, onScreen1 = Camera:WorldToViewportPoint(part1.Position)
+                            local screenPoint2, onScreen2 = Camera:WorldToViewportPoint(part2.Position)
+                            if onScreen1 and onScreen2 then
+                                line.From = Vector2.new(screenPoint1.X, screenPoint1.Y)
+                                line.To = Vector2.new(screenPoint2.X, screenPoint2.Y)
+                                line.Visible = true
+                            else
+                                line.Visible = false
+                            end
+                        else
+                            line.Visible = false
+                        end
+                    else
+                        line.Visible = false
+                    end
                 end
             else
-                line.Visible = false
+                for _, data in pairs(lines) do
+                    data.line.Visible = false
+                end
             end
-        end
+        end)
     end
 
-    RunService.RenderStepped:Connect(UpdateSkeleton)
+    coroutine.wrap(UpdateSkeleton)()
 end
 
 -- Apply Skeleton ESP to all players
@@ -888,8 +947,22 @@ end)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == espKey then
-        isESPEnabled = not isESPEnabled
-        SavedSettings.ESPEnabled = isESPEnabled
+        -- Sadece checkbox işaretliyse ESP'yi aç/kapa
+        if SavedSettings.ESPEnabled then
+            isESPEnabled = not isESPEnabled
+        end
+
+        -- Sadece checkbox işaretliyse Skeleton ESP'yi aç/kapa
+        if SavedSettings.SkeletonESPEnabled then
+            isSkeletonESPEnabled = not isSkeletonESPEnabled
+        end
+
+        -- Sadece checkbox işaretliyse Health Bar'ı aç/kapa
+        if SavedSettings.HealthBarEnabled then
+            isHealthBarEnabled = not isHealthBarEnabled
+        end
+
+        -- Tüm ESP'leri güncelle
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer then
                 coroutine.wrap(ESP)(player)
