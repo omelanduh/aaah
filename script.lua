@@ -304,7 +304,7 @@ local function CreateGUI()
     CreditLabel.Size = UDim2.new(0, 100, 0, 20)
     CreditLabel.Position = UDim2.new(0, 10, 1, -30)  -- Sol alt köşe
     CreditLabel.BackgroundTransparency = 1  -- Arka planı şeffaf yap
-    CreditLabel.Text = "made by ACNE"
+    CreditLabel.Text = "ANTEIKU ON TOP!"
     CreditLabel.TextColor3 = Color3.fromRGB(255, 131, 239)  -- Beyaz renk
     CreditLabel.TextTransparency = 0  -- Saydamlık (0 = tam opak, 1 = tam saydam)
     CreditLabel.TextSize = 20  -- Yazı boyutu
