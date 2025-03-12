@@ -19,6 +19,8 @@ local lockBodyPart = "HumanoidRootPart"  -- Default lock body part
 local speedValue = 16  -- Default speed value
 local isHealthBarEnabled = false  -- Health Bar toggle status
 local predictionValue = 0.1  -- Prediction value for camlock
+local isDistanceESPEnabled = false  -- Distance ESP toggle status
+local isTraceESPEnabled = false  -- Trace ESP toggle status
 
 -- ESP için Drawing objelerini saklamak için tablo
 local ESPTable = {}
@@ -41,13 +43,21 @@ local SavedSettings = {
     HealthBarEnabled = false,
     CamlockKey = "T",  -- Default camlock key
     SpeedKey = "C",  -- Default speed key,
-    ESPKey = "E",  -- Default ESP key
-    PredictionValue = 0.1  -- Default prediction value
+    ESPKey = "E",  -- Default ESP key,
+    PredictionValue = 0.1,  -- Default prediction value
+    DistanceESPEnabled = false,  -- Distance ESP toggle status
+    TraceESPEnabled = false,  -- Trace ESP toggle status
+    ESPColor = Color3.fromRGB(255, 0, 255),  -- Default ESP color
+    SkeletonESPColor = Color3.fromRGB(255, 0, 255),  -- Default Skeleton ESP color
+    HealthBarColor = Color3.fromRGB(0, 255, 0),  -- Default Health Bar color
+    DistanceESPColor = Color3.fromRGB(255, 0, 255),  -- Default Distance ESP color
+    TraceESPColor = Color3.fromRGB(255, 0, 255),  -- Default Trace ESP color
+    CamlockHighlightColor = Color3.fromRGB(128, 0, 128)  -- Default Camlock highlight color
 }
 
 -- Highlight Effect
 local highlight = Instance.new("Highlight")
-highlight.FillColor = Color3.fromRGB(128, 0, 128)  -- Mor renk
+highlight.FillColor = SavedSettings.CamlockHighlightColor  -- Mor renk
 highlight.FillTransparency = 0.5  -- Saydamlık
 highlight.OutlineColor = Color3.fromRGB(255, 255, 255)  -- Beyaz dış çizgi
 highlight.OutlineTransparency = 0  -- Dış çizgi saydamlığı
@@ -55,7 +65,7 @@ highlight.Parent = nil  -- Başlangıçta hiçbir şeye bağlı değil
 
 -- ESP Settings
 local Settings = {
-    Box_Color = Color3.fromRGB(255, 0, 0),  -- Box color
+    Box_Color = SavedSettings.ESPColor,  -- Box color
     Box_Thickness = 1,  -- Box thickness
     HealthBar = false  -- Health bar visibility
 }
@@ -63,6 +73,213 @@ local Settings = {
 -- GUI Creation
 local ScreenGui, MainFrame, Tabs, AimbotTab, PlayerTab, VisualTab
 
+
+-- Renk seçici için fonksiyon
+-- Renk seçici için fonksiyon
+local function CreateColorPicker(parent, position, defaultColor, callback)
+    local colorPickerButton = Instance.new("TextButton")
+    colorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    colorPickerButton.Position = position
+    colorPickerButton.BackgroundColor3 = defaultColor
+    colorPickerButton.Text = ""
+    colorPickerButton.Parent = parent
+
+    -- UICorner ekleyerek kenarları oval yap
+    local colorPickerCorner = Instance.new("UICorner")
+    colorPickerCorner.CornerRadius = UDim.new(0, 8)
+    colorPickerCorner.Parent = colorPickerButton
+
+    -- Renk seçici açıkken GUI'nin hareket etmesini engellemek için bir bayrak
+    local isColorPickerOpen = false
+
+    colorPickerButton.MouseButton1Click:Connect(function()
+        if isColorPickerOpen then return end  -- Renk seçici zaten açıksa tekrar açma
+        isColorPickerOpen = true
+
+        -- Renk seçici penceresi (GUI'nin sağ tarafında aç)
+        local colorPicker = Instance.new("Frame")
+        colorPicker.Size = UDim2.new(0, 200, 0, 200)
+        colorPicker.Position = UDim2.new(1, 10, 0, 0)  -- GUI'nin sağ tarafında aç
+        colorPicker.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        colorPicker.Parent = parent  -- GUI'nin içinde aç
+
+        -- UICorner ekleyerek kenarları oval yap
+        local colorPickerUICorner = Instance.new("UICorner")
+        colorPickerUICorner.CornerRadius = UDim.new(0, 12)
+        colorPickerUICorner.Parent = colorPicker
+
+        -- Kapatma butonu
+        local colorPickerCloseButton = Instance.new("TextButton")
+        colorPickerCloseButton.Size = UDim2.new(0, 30, 0, 30)
+        colorPickerCloseButton.Position = UDim2.new(1, -35, 0, 5)
+        colorPickerCloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        colorPickerCloseButton.Text = "X"
+        colorPickerCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        colorPickerCloseButton.TextSize = 18
+        colorPickerCloseButton.Font = Enum.Font.SourceSansBold
+        colorPickerCloseButton.Parent = colorPicker
+
+        -- UICorner ekleyerek kenarları oval yap
+        local closeButtonCorner = Instance.new("UICorner")
+        closeButtonCorner.CornerRadius = UDim.new(0, 8)
+        closeButtonCorner.Parent = colorPickerCloseButton
+
+        colorPickerCloseButton.MouseButton1Click:Connect(function()
+            colorPicker:Destroy()
+            isColorPickerOpen = false
+        end)
+
+        -- Renk seçici canvas'ı (yuvarlak renk çarkı)
+        local colorPickerCanvas = Instance.new("Frame")
+        colorPickerCanvas.Size = UDim2.new(0, 180, 0, 180)
+        colorPickerCanvas.Position = UDim2.new(0, 10, 0, 10)
+        colorPickerCanvas.BackgroundTransparency = 1
+        colorPickerCanvas.Parent = colorPicker
+
+        -- Yuvarlak renk çarkını çiz
+        local function DrawColorWheel()
+            local center = Vector2.new(90, 90)  -- Canvas'ın merkezi
+            local radius = 90  -- Yuvarlak çarkın yarıçapı
+
+            for x = 0, 180, 2 do  -- 2 piksel aralıklarla çiz (performans için)
+                for y = 0, 180, 2 do
+                    local dx = x - center.X
+                    local dy = y - center.Y
+                    local distance = math.sqrt(dx * dx + dy * dy)
+
+                    if distance <= radius then  -- Yuvarlak alan içinde kal
+                        local angle = math.atan2(dy, dx)
+                        local hue = (angle + math.pi) / (2 * math.pi)  -- HSV'de hue (0-1 arası)
+                        local saturation = distance / radius  -- HSV'de saturation (0-1 arası)
+                        local color = Color3.fromHSV(hue, saturation, 1)  -- HSV'den RGB'ye dönüşüm
+
+                        local pixel = Instance.new("Frame")
+                        pixel.Size = UDim2.new(0, 2, 0, 2)  -- 2x2 piksellik kareler
+                        pixel.Position = UDim2.new(0, x, 0, y)
+                        pixel.BackgroundColor3 = color
+                        pixel.BorderSizePixel = 0
+                        pixel.Parent = colorPickerCanvas
+                    end
+                end
+            end
+        end
+
+        DrawColorWheel()
+
+        -- Renk seçici göstergesi
+        local colorPickerIndicator = Instance.new("Frame")
+        colorPickerIndicator.Size = UDim2.new(0, 10, 0, 10)
+        colorPickerIndicator.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        colorPickerIndicator.BorderSizePixel = 2
+        colorPickerIndicator.BorderColor3 = Color3.fromRGB(255, 255, 255)
+        colorPickerIndicator.Parent = colorPickerCanvas
+
+        -- UICorner ekleyerek kenarları oval yap
+        local indicatorCorner = Instance.new("UICorner")
+        indicatorCorner.CornerRadius = UDim.new(0, 5)
+        indicatorCorner.Parent = colorPickerIndicator
+
+        -- Renk seçiciye tıklama ve sürükleme işlevselliği
+        local isDragging = false
+
+        colorPickerCanvas.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = true
+                -- Renk seçiciye tıklandığında renk seçimi yap
+                local mousePosition = Vector2.new(input.Position.X, input.Position.Y)
+                local canvasPosition = colorPickerCanvas.AbsolutePosition
+                local canvasSize = colorPickerCanvas.AbsoluteSize
+
+                local relativePosition = Vector2.new(
+                    (mousePosition.X - canvasPosition.X) / canvasSize.X,
+                    (mousePosition.Y - canvasPosition.Y) / canvasSize.Y
+                )
+
+                relativePosition = Vector2.new(
+                    math.clamp(relativePosition.X, 0, 1),
+                    math.clamp(relativePosition.Y, 0, 1)
+                )
+
+                -- Yuvarlak alan içinde kal
+                local dx = relativePosition.X * 180 - 90
+                local dy = relativePosition.Y * 180 - 90
+                local distance = math.sqrt(dx * dx + dy * dy)
+
+                if distance <= 90 then
+                    local angle = math.atan2(dy, dx)
+                    local hue = (angle + math.pi) / (2 * math.pi)
+                    local saturation = distance / 90
+                    local color = Color3.fromHSV(hue, saturation, 1)
+                    colorPickerButton.BackgroundColor3 = color
+                    callback(color)
+                    colorPickerIndicator.Position = UDim2.new(relativePosition.X, -5, relativePosition.Y, -5)
+                end
+            end
+        end)
+
+        colorPickerCanvas.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = false
+            end
+        end)
+
+        colorPickerCanvas.InputChanged:Connect(function(input)
+            if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local mousePosition = Vector2.new(input.Position.X, input.Position.Y)
+                local canvasPosition = colorPickerCanvas.AbsolutePosition
+                local canvasSize = colorPickerCanvas.AbsoluteSize
+
+                local relativePosition = Vector2.new(
+                    (mousePosition.X - canvasPosition.X) / canvasSize.X,
+                    (mousePosition.Y - canvasPosition.Y) / canvasSize.Y
+                )
+
+                relativePosition = Vector2.new(
+                    math.clamp(relativePosition.X, 0, 1),
+                    math.clamp(relativePosition.Y, 0, 1)
+                )
+
+                -- Yuvarlak alan içinde kal
+                local dx = relativePosition.X * 180 - 90
+                local dy = relativePosition.Y * 180 - 90
+                local distance = math.sqrt(dx * dx + dy * dy)
+
+                if distance <= 90 then
+                    local angle = math.atan2(dy, dx)
+                    local hue = (angle + math.pi) / (2 * math.pi)
+                    local saturation = distance / 90
+                    local color = Color3.fromHSV(hue, saturation, 1)
+                    colorPickerButton.BackgroundColor3 = color
+                    callback(color)
+                    colorPickerIndicator.Position = UDim2.new(relativePosition.X, -5, relativePosition.Y, -5)
+                end
+            end
+        end)
+    end)
+end
+
+-- ESP renklerini güncelleme fonksiyonu
+local function UpdateESPColors()
+    for plr, library in pairs(ESPTable) do
+        if library.name then
+            library.name.Color = SavedSettings.ESPColor
+        end
+        if library.healthbar then
+            library.healthbar.Color = SavedSettings.HealthBarColor
+        end
+        if library.greenhealth then
+            library.greenhealth.Color = SavedSettings.HealthBarColor
+        end
+        if library.distance then
+            library.distance.Color = SavedSettings.DistanceESPColor
+        end
+        if library.trace then
+            library.trace.Color = SavedSettings.TraceESPColor
+        end
+    end
+end
+
+-- GUI'yi oluşturma fonksiyonu
 local function CreateGUI()
     ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
@@ -455,6 +672,60 @@ local function CreateGUI()
     HealthBarLabel.Font = Enum.Font.SourceSansBold
     HealthBarLabel.Parent = VisualTab
 
+    -- Distance ESP CheckBox
+    local DistanceESPCheckBox = Instance.new("TextButton")
+    DistanceESPCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    DistanceESPCheckBox.Position = UDim2.new(0, 10, 0, 170)
+    DistanceESPCheckBox.BackgroundColor3 = SavedSettings.DistanceESPEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    DistanceESPCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DistanceESPCheckBox.Text = ""
+    DistanceESPCheckBox.TextSize = 24
+    DistanceESPCheckBox.Font = Enum.Font.SourceSansBold
+    DistanceESPCheckBox.AutoButtonColor = false
+    DistanceESPCheckBox.Parent = VisualTab
+
+    -- DistanceESPCheckBox için UICorner ekle
+    local DistanceESPCheckBoxCorner = Instance.new("UICorner")
+    DistanceESPCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    DistanceESPCheckBoxCorner.Parent = DistanceESPCheckBox
+
+    local DistanceESPLabel = Instance.new("TextLabel")
+    DistanceESPLabel.Size = UDim2.new(0, 100, 0, 30)
+    DistanceESPLabel.Position = UDim2.new(0, 50, 0, 170)
+    DistanceESPLabel.BackgroundTransparency = 1
+    DistanceESPLabel.Text = "Distance ESP"
+    DistanceESPLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DistanceESPLabel.TextSize = 18
+    DistanceESPLabel.Font = Enum.Font.SourceSansBold
+    DistanceESPLabel.Parent = VisualTab
+
+    -- Trace ESP CheckBox
+    local TraceESPCheckBox = Instance.new("TextButton")
+    TraceESPCheckBox.Size = UDim2.new(0, 30, 0, 30)
+    TraceESPCheckBox.Position = UDim2.new(0, 10, 0, 210)
+    TraceESPCheckBox.BackgroundColor3 = SavedSettings.TraceESPEnabled and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
+    TraceESPCheckBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TraceESPCheckBox.Text = ""
+    TraceESPCheckBox.TextSize = 24
+    TraceESPCheckBox.Font = Enum.Font.SourceSansBold
+    TraceESPCheckBox.AutoButtonColor = false
+    TraceESPCheckBox.Parent = VisualTab
+
+    -- TraceESPCheckBox için UICorner ekle
+    local TraceESPCheckBoxCorner = Instance.new("UICorner")
+    TraceESPCheckBoxCorner.CornerRadius = UDim.new(0, 8)
+    TraceESPCheckBoxCorner.Parent = TraceESPCheckBox
+
+    local TraceESPLabel = Instance.new("TextLabel")
+    TraceESPLabel.Size = UDim2.new(0, 100, 0, 30)
+    TraceESPLabel.Position = UDim2.new(0, 50, 0, 210)
+    TraceESPLabel.BackgroundTransparency = 1
+    TraceESPLabel.Text = "Trace ESP"
+    TraceESPLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TraceESPLabel.TextSize = 18
+    TraceESPLabel.Font = Enum.Font.SourceSansBold
+    TraceESPLabel.Parent = VisualTab
+
     -- Toggle Checkmark Function
     local function ToggleCheckmark(button, isChecked)
         local targetColor = isChecked and Color3.fromRGB(50, 0, 50) or Color3.fromRGB(80, 0, 80)
@@ -482,19 +753,41 @@ local function CreateGUI()
         ToggleCheckmark(SkeletonESPCheckBox, isSkeletonESPEnabled)
     end)
 
-	-- Health Bar CheckBox Functionality
-	HealthBarCheckBox.MouseButton1Click:Connect(function()
-    	isHealthBarEnabled = not isHealthBarEnabled
-    	SavedSettings.HealthBarEnabled = isHealthBarEnabled
-    	ToggleCheckmark(HealthBarCheckBox, isHealthBarEnabled)
+    -- Health Bar CheckBox Functionality
+    HealthBarCheckBox.MouseButton1Click:Connect(function()
+        isHealthBarEnabled = not isHealthBarEnabled
+        SavedSettings.HealthBarEnabled = isHealthBarEnabled
+        ToggleCheckmark(HealthBarCheckBox, isHealthBarEnabled)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                coroutine.wrap(ESP)(player)
+            end
+        end
+    end)
 
-    	-- Tüm ESP'leri yeniden çiz
-    	for _, player in pairs(Players:GetPlayers()) do
-        	if player ~= LocalPlayer then
-            	coroutine.wrap(ESP)(player)
-        	end
-    	end
-	end)
+    -- Distance ESP CheckBox Functionality
+    DistanceESPCheckBox.MouseButton1Click:Connect(function()
+        isDistanceESPEnabled = not isDistanceESPEnabled
+        SavedSettings.DistanceESPEnabled = isDistanceESPEnabled
+        ToggleCheckmark(DistanceESPCheckBox, isDistanceESPEnabled)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                coroutine.wrap(ESP)(player)
+            end
+        end
+    end)
+
+    -- Trace ESP CheckBox Functionality
+    TraceESPCheckBox.MouseButton1Click:Connect(function()
+        isTraceESPEnabled = not isTraceESPEnabled
+        SavedSettings.TraceESPEnabled = isTraceESPEnabled
+        ToggleCheckmark(TraceESPCheckBox, isTraceESPEnabled)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                coroutine.wrap(ESP)(player)
+            end
+        end
+    end)
 
     -- Camlock CheckBox Functionality
     CamlockCheckBox.MouseButton1Click:Connect(function()
@@ -615,6 +908,109 @@ local function CreateGUI()
             UpdateInput(input)
         end
     end)
+
+    -- Renk seçici butonlarını ekle
+    local ESPColorPickerButton = Instance.new("TextButton")
+    ESPColorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    ESPColorPickerButton.Position = UDim2.new(0, 160, 0, 10)
+    ESPColorPickerButton.BackgroundColor3 = SavedSettings.ESPColor
+    ESPColorPickerButton.Text = ""
+    ESPColorPickerButton.Parent = VisualTab
+
+    -- UICorner ekleyerek kenarları oval yap
+    local ESPColorPickerCorner = Instance.new("UICorner")
+    ESPColorPickerCorner.CornerRadius = UDim.new(0, 8)
+    ESPColorPickerCorner.Parent = ESPColorPickerButton
+
+    CreateColorPicker(VisualTab, UDim2.new(0, 160, 0, 10), SavedSettings.ESPColor, function(color)
+        SavedSettings.ESPColor = color
+        UpdateESPColors()  -- Tüm ESP çizimlerini güncelle
+    end)
+
+    local SkeletonESPColorPickerButton = Instance.new("TextButton")
+    SkeletonESPColorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    SkeletonESPColorPickerButton.Position = UDim2.new(0, 160, 0, 90)
+    SkeletonESPColorPickerButton.BackgroundColor3 = SavedSettings.SkeletonESPColor
+    SkeletonESPColorPickerButton.Text = ""
+    SkeletonESPColorPickerButton.Parent = VisualTab
+
+    -- UICorner ekleyerek kenarları oval yap
+    local SkeletonESPColorPickerCorner = Instance.new("UICorner")
+    SkeletonESPColorPickerCorner.CornerRadius = UDim.new(0, 8)
+    SkeletonESPColorPickerCorner.Parent = SkeletonESPColorPickerButton
+
+    CreateColorPicker(VisualTab, UDim2.new(0, 160, 0, 90), SavedSettings.SkeletonESPColor, function(color)
+        SavedSettings.SkeletonESPColor = color
+    end)
+
+    local HealthBarColorPickerButton = Instance.new("TextButton")
+    HealthBarColorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    HealthBarColorPickerButton.Position = UDim2.new(0, 160, 0, 130)
+    HealthBarColorPickerButton.BackgroundColor3 = SavedSettings.HealthBarColor
+    HealthBarColorPickerButton.Text = ""
+    HealthBarColorPickerButton.Parent = VisualTab
+
+    -- UICorner ekleyerek kenarları oval yap
+    local HealthBarColorPickerCorner = Instance.new("UICorner")
+    HealthBarColorPickerCorner.CornerRadius = UDim.new(0, 8)
+    HealthBarColorPickerCorner.Parent = HealthBarColorPickerButton
+
+    CreateColorPicker(VisualTab, UDim2.new(0, 160, 0, 130), SavedSettings.HealthBarColor, function(color)
+        SavedSettings.HealthBarColor = color
+        UpdateESPColors()  -- Tüm ESP çizimlerini güncelle
+    end)
+
+    local DistanceESPColorPickerButton = Instance.new("TextButton")
+    DistanceESPColorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    DistanceESPColorPickerButton.Position = UDim2.new(0, 160, 0, 170)
+    DistanceESPColorPickerButton.BackgroundColor3 = SavedSettings.DistanceESPColor
+    DistanceESPColorPickerButton.Text = ""
+    DistanceESPColorPickerButton.Parent = VisualTab
+
+    -- UICorner ekleyerek kenarları oval yap
+    local DistanceESPColorPickerCorner = Instance.new("UICorner")
+    DistanceESPColorPickerCorner.CornerRadius = UDim.new(0, 8)
+    DistanceESPColorPickerCorner.Parent = DistanceESPColorPickerButton
+
+    CreateColorPicker(VisualTab, UDim2.new(0, 160, 0, 170), SavedSettings.DistanceESPColor, function(color)
+        SavedSettings.DistanceESPColor = color
+        UpdateESPColors()  -- Tüm ESP çizimlerini güncelle
+    end)
+
+    local TraceESPColorPickerButton = Instance.new("TextButton")
+    TraceESPColorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    TraceESPColorPickerButton.Position = UDim2.new(0, 160, 0, 210)
+    TraceESPColorPickerButton.BackgroundColor3 = SavedSettings.TraceESPColor
+    TraceESPColorPickerButton.Text = ""
+    TraceESPColorPickerButton.Parent = VisualTab
+
+    -- UICorner ekleyerek kenarları oval yap
+    local TraceESPColorPickerCorner = Instance.new("UICorner")
+    TraceESPColorPickerCorner.CornerRadius = UDim.new(0, 8)
+    TraceESPColorPickerCorner.Parent = TraceESPColorPickerButton
+
+    CreateColorPicker(VisualTab, UDim2.new(0, 160, 0, 210), SavedSettings.TraceESPColor, function(color)
+        SavedSettings.TraceESPColor = color
+        UpdateESPColors()  -- Tüm ESP çizimlerini güncelle
+    end)
+
+    -- Camlock Highlight Color Picker
+    local CamlockHighlightColorPickerButton = Instance.new("TextButton")
+    CamlockHighlightColorPickerButton.Size = UDim2.new(0, 30, 0, 30)
+    CamlockHighlightColorPickerButton.Position = UDim2.new(0, 160, 0, 10)
+    CamlockHighlightColorPickerButton.BackgroundColor3 = SavedSettings.CamlockHighlightColor
+    CamlockHighlightColorPickerButton.Text = ""
+    CamlockHighlightColorPickerButton.Parent = AimbotTab
+
+    -- UICorner ekleyerek kenarları oval yap
+    local CamlockHighlightColorPickerCorner = Instance.new("UICorner")
+    CamlockHighlightColorPickerCorner.CornerRadius = UDim.new(0, 8)
+    CamlockHighlightColorPickerCorner.Parent = CamlockHighlightColorPickerButton
+
+    CreateColorPicker(AimbotTab, UDim2.new(0, 160, 0, 10), SavedSettings.CamlockHighlightColor, function(color)
+        SavedSettings.CamlockHighlightColor = color
+        highlight.FillColor = color
+    end)
 end
 
 -- Toggle GUI with Home Key
@@ -638,7 +1034,6 @@ end)
 -- Initial GUI Creation
 CreateGUI()
 
-
 local function ESP(plr)
     if ESPTable[plr] then
         return
@@ -647,14 +1042,16 @@ local function ESP(plr)
     local library = {
         name = Drawing.new("Text"),
         healthbar = Drawing.new("Line"),
-        greenhealth = Drawing.new("Line")
+        greenhealth = Drawing.new("Line"),
+        distance = Drawing.new("Text"),  -- Distance ESP için
+        trace = Drawing.new("Line")  -- Trace ESP için
     }
 
     ESPTable[plr] = library
 
     -- ESP ismi sadece ESP checkbox işaretliyse gösterilsin
     library.name.Visible = isESPEnabled and SavedSettings.ESPEnabled
-    library.name.Color = Settings.Box_Color
+    library.name.Color = SavedSettings.ESPColor  -- Kullanıcının seçtiği renk
     library.name.Size = 18
     library.name.Center = true
     library.name.Outline = true
@@ -663,12 +1060,25 @@ local function ESP(plr)
 
     -- Health Bar sadece Health Bar checkbox işaretliyse gösterilsin
     library.healthbar.Visible = isHealthBarEnabled and SavedSettings.HealthBarEnabled
-    library.healthbar.Color = Color3.fromRGB(255, 0, 0)
+    library.healthbar.Color = SavedSettings.HealthBarColor
     library.healthbar.Thickness = 2
 
     library.greenhealth.Visible = isHealthBarEnabled and SavedSettings.HealthBarEnabled
-    library.greenhealth.Color = Color3.fromRGB(0, 255, 0)
+    library.greenhealth.Color = SavedSettings.HealthBarColor
     library.greenhealth.Thickness = 2
+
+    -- Distance ESP sadece Distance ESP checkbox işaretliyse gösterilsin
+    library.distance.Visible = isDistanceESPEnabled and SavedSettings.DistanceESPEnabled
+    library.distance.Color = SavedSettings.DistanceESPColor
+    library.distance.Size = 18
+    library.distance.Center = true
+    library.distance.Outline = true
+    library.distance.OutlineColor = Color3.new(0, 0, 0)
+
+    -- Trace ESP sadece Trace ESP checkbox işaretliyse gösterilsin
+    library.trace.Visible = isTraceESPEnabled and SavedSettings.TraceESPEnabled
+    library.trace.Color = SavedSettings.TraceESPColor
+    library.trace.Thickness = 1
 
     local function Updater()
         local connection
@@ -708,20 +1118,45 @@ local function ESP(plr)
                             library.healthbar.Visible = false
                             library.greenhealth.Visible = false
                         end
+
+                        -- Distance ESP sadece Distance ESP checkbox işaretliyse gösterilsin
+                        if isDistanceESPEnabled and SavedSettings.DistanceESPEnabled then
+                            library.distance.Text = tostring(math.floor(distance)) .. "m"
+                            library.distance.Position = Vector2.new(rootPos.X, rootPos.Y + 20)
+                            library.distance.Visible = true
+                        else
+                            library.distance.Visible = false
+                        end
+
+                        -- Trace ESP sadece Trace ESP checkbox işaretliyse gösterilsin
+                        if isTraceESPEnabled and SavedSettings.TraceESPEnabled then
+                            local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                            library.trace.From = screenCenter
+                            library.trace.To = Vector2.new(rootPos.X, rootPos.Y)
+                            library.trace.Visible = true
+                        else
+                            library.trace.Visible = false
+                        end
                     else
                         library.name.Visible = false
                         library.healthbar.Visible = false
                         library.greenhealth.Visible = false
+                        library.distance.Visible = false
+                        library.trace.Visible = false
                     end
                 else
                     library.name.Visible = false
                     library.healthbar.Visible = false
                     library.greenhealth.Visible = false
+                    library.distance.Visible = false
+                    library.trace.Visible = false
                 end
             else
                 library.name.Visible = false
                 library.healthbar.Visible = false
                 library.greenhealth.Visible = false
+                library.distance.Visible = false
+                library.trace.Visible = false
                 if not Players:FindFirstChild(plr.Name) then
                     connection:Disconnect()
                 end
@@ -730,7 +1165,6 @@ local function ESP(plr)
     end
     coroutine.wrap(Updater)()
 end
-
 
 for _, player in pairs(Players:GetPlayers()) do
     if player ~= LocalPlayer then
@@ -763,7 +1197,6 @@ local function ClearAllESP()
 end
 
 -- Skeleton ESP Functionality
--- Skeleton ESP Functionality
 local function DrawSkeleton(character)
     local boneConnections = {
         {"Head", "UpperTorso"},
@@ -789,7 +1222,7 @@ local function DrawSkeleton(character)
         if part1 and part2 then
             local line = Drawing.new("Line")
             line.Visible = isSkeletonESPEnabled and SavedSettings.SkeletonESPEnabled
-            line.Color = Color3.fromRGB(255, 0, 0)
+            line.Color = SavedSettings.SkeletonESPColor
             line.Thickness = 2
             table.insert(lines, {line = line, part1 = part1, part2 = part2})
         end
@@ -960,6 +1393,16 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         -- Sadece checkbox işaretliyse Health Bar'ı aç/kapa
         if SavedSettings.HealthBarEnabled then
             isHealthBarEnabled = not isHealthBarEnabled
+        end
+
+        -- Sadece checkbox işaretliyse Distance ESP'yi aç/kapa
+        if SavedSettings.DistanceESPEnabled then
+            isDistanceESPEnabled = not isDistanceESPEnabled
+        end
+
+        -- Sadece checkbox işaretliyse Trace ESP'yi aç/kapa
+        if SavedSettings.TraceESPEnabled then
+            isTraceESPEnabled = not isTraceESPEnabled
         end
 
         -- Tüm ESP'leri güncelle
